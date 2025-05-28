@@ -1,0 +1,7 @@
+cls: CELoss
+kwargs: 
+  class_weights : [1.0, 2.0]
+  ignore_index : 255
+  use_top_k : True
+  top_k_ratio : 0.25
+  future_discount : 0.95

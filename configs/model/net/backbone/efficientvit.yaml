@@ -1,0 +1,3 @@
+_target_: bevpredformer.models.img_encoder.EfficientVit
+version: efficientvit_l2.r256_in1k
+downsample: 8

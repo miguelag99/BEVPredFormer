@@ -1,0 +1,10 @@
+defaults:
+  - _self_
+
+_target_: bevpredformer.models.autoencoder.SegFormer
+
+name: nvidia/segformer-b0-finetuned-cityscapes-1024-1024
+embed_dim: ${eval:${model.net.out_c.autoencoder} * 1}
+out_channels: ${eval:${model.net.out_c.autoencoder} * 1}
+head_up_kernel: 4
+head_up_stride: 4 # x4

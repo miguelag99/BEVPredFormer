@@ -1,0 +1,18 @@
+# With this config, the head is responsible for generating the future channels
+defaults:
+  - _self_
+
+_target_: bevpredformer.models.heads.MultiPyramidHead
+
+shared_out_c: ${model.net.out_c.autoencoder}
+latent_dim: 64
+out_seq_len: ${model.net.out_seq_len}
+in_seq_len: ${model.net.in_seq_len}
+# Outputs
+with_centr_offs: ${data.keep_input_centr_offs}
+with_binimg: ${data.keep_input_binimg}
+with_multiclass: True
+class_weights: ${model.loss_kwargs.segm_type.kwargs.class_weights}
+with_hdmap: ${data.keep_input_hdmap}
+with_flow: ${data.keep_input_flow_map}
+hdmap_names: ${data.hdmap_names}

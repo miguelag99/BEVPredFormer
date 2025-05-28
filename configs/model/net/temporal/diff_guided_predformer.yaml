@@ -1,0 +1,20 @@
+# With this config, the temporal fuser is responsible for generating the future channels
+defaults:
+  - _self_
+
+_target_: bevpredformer.models.temporal.DiffGuidedPredFormerTemporal
+
+in_channels: ${eval:${model.net.out_c.autoencoder} + 6} # Additional channels for the future ego transform
+out_channels: ${model.net.out_c.autoencoder}
+bev_size: ${model.net.in_shape.query_gen}
+embed_dim: 256
+depth: 2
+attn_depth: 1
+num_heads: 8
+patch_size: 4
+num_past_frames: 3
+dropout: 0.1
+mlp_ratio: 4
+up_type: convtranspose
+attn_type: TripletTST
+query_type: linear

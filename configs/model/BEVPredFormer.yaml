@@ -1,0 +1,70 @@
+defaults:
+  - _self_
+  - net/backbone: efficientvit.yaml
+  - net/neck: agp.yaml
+  - optimizer: adamW.yaml
+  - scheduler: onecycle.yaml
+  - net/autoencoder: sparse_unet.yaml
+  - net/temporal: diff_guided_predformer.yaml
+  - net/heads: pyramid_stconv.yaml
+
+name: BEVPredFormer
+
+_target_: bevpredformer.models.PredictionTrainer
+
+net:
+  _target_: bevpredformer.models.segmentor.BEVPredFormerSegmentor
+
+  in_shape:
+    query_gen: [200,200] # bev queries
+    hit_views: 8
+    projector: [200,200,8]
+    spatial_bounds: ${model.net.projector.spatial_bounds}
+
+  # If true, the temporal block will need 6 extra channels to concatenate the temporal 
+  # ego transform of the past bev features
+  use_future_ego: true
+
+  out_seq_len: 1
+  in_seq_len: 3
+
+  in_c:
+    neck: ${get_in_c_neck:${model.net.backbone._target_}}
+
+  out_c:
+    base_neck: 128
+    neck : ${model.net.out_c.base_neck}
+    vt: ${model.net.out_c.base_neck}
+    query_gen: 128
+    autoencoder: ${model.net.out_c.vt}
+
+  query_gen:
+    _target_: bevpredformer.models.layers.Latent2DQueryGenerator
+    bev_shape: ${model.net.in_shape.query_gen}
+    channels: ${model.net.out_c.query_gen}
+
+  projector:
+    _target_: bevpredformer.models.projector.BevFormerProjector
+    spatial_bounds:  [-49.75, 49.75, -49.75, 49.75, -3.375, 5.375]
+    # spatial_bounds:  [-14,925, 14,925, -14,925, 14,925, -3.375, 5.375]
+
+  view_transform:
+    _target_: bevpredformer.models.view_transform.attention.DefAttnVT
+    n_layers: 6 
+    query_c: ${model.net.out_c.query_gen}
+    ffn_dim: 1024
+    sa_defattn_kwargs:
+      in_c: ${model.net.out_c.query_gen}
+      dropout: 0.1
+      query_shape: ${model.net.in_shape.query_gen}
+      msdef_kwargs: 
+        n_levels: 1
+        n_heads: 4
+        n_points: 8
+    ca_defattn_kwargs:
+      in_c: ${model.net.out_c.query_gen}
+      dropout: 0.1
+      msdef_kwargs:
+        num_levels: 1
+        num_heads: 4
+        num_points: 8
