@@ -11,10 +11,10 @@
     <img src="https://img.shields.io/badge/Lightning-1.9.5-purple?style=for-the-badge&logo=lightning" alt="Lightning">
   </a>
   <a href="https://wandb.ai/">
-    <img src="https://img.shields.io/badge/Wandb-yellow?style=for-the-badge&logo=weightsandbiases" alt="wandb">
+    <img src="https://img.shields.io/badge/Wandb-gray?style=for-the-badge&logo=weightsandbiases" alt="wandb">
   </a>
   <a href="https://www.docker.com">
-    <img src="https://img.shields.io/badge/Docker-%23007FFF?style=for-the-badge&logo=docker&logoColor=white&labelColor=%23007FFF" alt="Docker">
+    <img src="https://img.shields.io/badge/Docker-gray?style=for-the-badge&logo=docker&logoColor=white&labelColor=%23007FFF" alt="Docker">
   </a>
 </div>
 
@@ -67,3 +67,10 @@ make run
 ```
 
 This command will run a bash inside the container and mount the current directory and dataset inside the container.
+
+## Contact
+
+[![Static Badge](https://img.shields.io/badge/ORCID-0009--0008--5627--5325-green?style=flat&logo=orcid)
+](https://orcid.org/0009-0008-5627-5325)
+
+If you have any questions, feel free to contact me at [miguel.antunes@uah.es](mailto:miguel.antunes@uah.es).
