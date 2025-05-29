@@ -84,6 +84,11 @@ WORKDIR /home/$USER/workspace
 ENV USER=$USER
 RUN echo "alias PRUEBAS=\"cd /home/$USER/workspace && python bevpredformer/pruebas.py\"" >> /home/$USER/.bashrc
 
+# Change terminal color
+ENV TERM=xterm-256color
+RUN echo "PS1='\[\e[91m\]\u\[\e[0m\]@\[\e[93m\]\h\[\e[0m\]:\[\e[35m\]\w\[\e[0m\] > '" >> ~/.bashrc
+RUN echo "source ~/.bashrc" >> ~/.bash_profile
+
 # Entrypoint
 ENTRYPOINT [ "docker/entrypoint.sh" ]
 # ENTRYPOINT [ "/bin/bash", "-l", "-c"  ]
