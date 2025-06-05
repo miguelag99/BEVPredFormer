@@ -1,5 +1,6 @@
 import spconv.pytorch as spconv
 from einops import rearrange
+import torch
 from torch import nn
 
 from bevpredformer.utils.debug import debug_hook
@@ -229,8 +230,43 @@ class SparseUNet(nn.Module):
             assert batch_size is not None
             x_sp = spconv.SparseConvTensor(feats, indices, spatial_shape, batch_size)
         else:
-            feats = rearrange(feats, "b c h w -> b h w c")
-            x_sp = spconv.SparseConvTensor.from_dense(feats)
+            assert isinstance(feats, torch.Tensor), "feats must be a dense tensor"
+            batch_size, channels, height, width = feats.shape
+            
+            batch_indices = []
+            batch_features = []
+            
+            for b in range(batch_size):
+                # Get non-zero indices for this batch
+                batch_feats = feats[b]  # [C, H, W]
+                nonzero_mask = batch_feats.abs().sum(dim=0) > 0  # [H, W]
+                h_indices, w_indices = torch.nonzero(nonzero_mask, as_tuple=True)
+                
+                # Create batch indices tensor
+                num_points = h_indices.size(0)
+                if num_points == 0:
+                    continue  # Skip if no points in this batch
+                
+                batch_idx = torch.full_like(h_indices, b)
+                
+                # Stack indices for this batch
+                curr_indices = torch.stack([batch_idx, h_indices, w_indices], dim=1)
+                batch_indices.append(curr_indices)
+                
+                # Get features at those positions: shape [num_points, channels]
+                curr_features = batch_feats[:, h_indices, w_indices].permute(1, 0)
+                batch_features.append(curr_features)
+            
+            if not batch_indices:
+                # Handle empty case with a minimal sparse tensor
+                empty_indices = torch.zeros((0, 3), dtype=torch.int32, device=feats.device)
+                empty_features = torch.zeros((0, channels), dtype=feats.dtype, device=feats.device)
+                x_sp = spconv.SparseConvTensor(empty_features, empty_indices, [height, width], batch_size)
+            else:
+                # Combine all batches
+                indices = torch.cat(batch_indices, dim=0).int()  # [total_points, 3]
+                features = torch.cat(batch_features, dim=0)  # [total_points, channels]
+                x_sp = spconv.SparseConvTensor(features, indices, [height, width], batch_size)
         x_sp, skip_x = self.encoder(x_sp)
         x_sp = self.decoder(x_sp, skip_x)
         x_sp = self.tail_conv(x_sp)
