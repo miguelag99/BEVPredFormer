@@ -2,7 +2,7 @@
 
 <div align=center>
   <a href="https://github.com/miguelag99/BEVPredFormer/blob/main/CHANGELOG.md">
-    <img src="https://img.shields.io/badge/Changelog-v0.0.0-2ea44f?style=for-the-badge" alt="CHANGELOG">
+    <img src="https://img.shields.io/badge/Changelog-v1.0.0-2ea44f?style=for-the-badge" alt="CHANGELOG">
   </a>
   <a href="https://pytorch.org">
     <img src="https://img.shields.io/badge/PyTorch-2.5.1-EE4C2C.svg?style=for-the-badge&logo=pytorch" alt="pytorch">
@@ -26,7 +26,7 @@ Implementation of BEVPredFormer, a transformer-based model for predicting future
 4. Temporal module based on Predformer and DiffGuided module.
 5. Multi-scale prediction heads.
 
-## NuScenes Dataset
+## 1. NuScenes Dataset
 
 Download the NuScenes dataset from the [official website](https://www.nuscenes.org/download) and extract the files in a folder with the following structure:
 
@@ -45,7 +45,7 @@ Configure the path to the NuScenes dataset in the Makefile:
 NUSCENES_PATH = /path/to/nuscenes
 ```
 
-## Installation and Usage
+## 2. Installation and Usage
 
 Build the Docker image with the following command:
 
@@ -67,6 +67,20 @@ make run
 ```
 
 This command will run a bash inside the container and mount the current directory and dataset inside the container.
+
+### 2.1 Training
+
+To train any version of BEVPredFormer, you can use the following command inside the Docker container:
+
+```bash
+python bevpredformer/train.py
+```
+
+The different configuration parameters can be tuned in the different yaml files located in the *configs* directory.
+
+It is recommended to use some of the pretrained models available:
+
+- BEVPredformer_Backbone_05.ckpt: Pretrained model with EfficientViT backbone for semantic segmentation (no prediction head). Recommended to use as a freezed backbone to train prediction models. Keys to load and freeze in train.yaml: `'net.backbone', 'net.neck', 'net.view_transform', 'net.decoder', 'net.coord_selector' and 'net.query_gen'`.
 
 ## Contact
 
