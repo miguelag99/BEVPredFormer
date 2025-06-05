@@ -5,7 +5,7 @@ defaults:
 _target_: bevpredformer.data.datamodule.NuScenesDatamodule
 
 # Nuscenes
-version: mini
+version: trainval
 dataroot: ${paths.data_dir}
 hdmaproot: ${paths.data_dir}/nuscenes_processed_map
 is_lyft: False
