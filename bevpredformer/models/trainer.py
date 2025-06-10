@@ -484,7 +484,7 @@ class PredictionTrainer(LightningModule):
                     pred_binimg.contiguous(), 2, keepdims=True
                 )
                 metric(
-                    torch.argmax(cls_pred_binimg[:, 1:], 2, True) * valid_binimg[:, 1:],
+                   cls_pred_binimg[:, 1:] * valid_binimg[:, 1:],
                     target_binimg[:, 1:] * valid_binimg[:, 1:],
                 )
 
@@ -785,14 +785,14 @@ class PredictionTrainer(LightningModule):
     def on_validation_epoch_end(self):
         log_dict = self.common_epoch_end(mode="val")
         self.log_dict(
-            log_dict, prog_bar=True, on_epoch=True, logger=False, sync_dist=True
+            log_dict, prog_bar=True, on_epoch=True, logger=True, sync_dist=True
         )
         return
 
     def on_test_epoch_end(self):
         log_dict = self.common_epoch_end(mode="val")
         self.log_dict(
-            log_dict, prog_bar=True, on_epoch=True, logger=False, sync_dist=True
+            log_dict, prog_bar=True, on_epoch=True, logger=True, sync_dist=True
         )
         return
 

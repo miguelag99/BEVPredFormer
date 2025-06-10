@@ -3,7 +3,7 @@
 defaults:
   - _self_
   - data: nuscenes_pred.yaml
-  - model: Pred_BeVFormer_T.yaml
+  - model: BEVPredFormerPredictor.yaml
   - callbacks: default_pl.yaml
   - plugins: null
   - logger: default_pl.yaml
@@ -26,7 +26,7 @@ profile: False
 
 # simply provide checkpoint path to evaluate
 ckpt:
-  path: "bevformer_pred_last.ckpt"
+  path: "checkpoints/effvit_SpUnet_2TripletTST_256_ps4_scale05.ckpt"
   model:
     freeze: null
     load: 'all'
