@@ -105,7 +105,10 @@ class PredictionTrainer(LightningModule):
                     }
                 }
             )
-
+            dict_metrics.update(
+                {"metric_iou_Time_Avg": IntersectionOverUnion(n_classes=2)}
+            )
+            
             # Tracking metrics during the learning
             self.track_pts = metric_kwargs["track_pts"]
             if self.track_pts:
@@ -475,6 +478,15 @@ class PredictionTrainer(LightningModule):
                         target_binimg[:, index],
                         valid_binimg[:, index],
                     )
+            if hasattr(self, f"metric_iou_Time_Avg_{mode}"):
+                metric = getattr(self, "_".join(["metric_iou_Time_Avg", mode]))
+                cls_pred_binimg = torch.argmax(
+                    pred_binimg.contiguous(), 2, keepdims=True
+                )
+                metric(
+                    torch.argmax(cls_pred_binimg[:, 1:], 2, True) * valid_binimg[:, 1:],
+                    target_binimg[:, 1:] * valid_binimg[:, 1:],
+                )
 
             if hasattr(self, f"metric_N_coarse_pts_{mode}"):
                 metric = getattr(self, "_".join(["metric_N_coarse_pts", mode]))
@@ -729,6 +741,17 @@ class PredictionTrainer(LightningModule):
                         {f"{mode}/{ref}/metric_{name}_{subname}": scores},
                         step=self.current_epoch,
                     )
+                 
+        if hasattr(self, f"metric_iou_Time_Avg_{mode}"):
+            metric = getattr(self, f"metric_iou_Time_Avg_{mode}")
+            iou_avg = metric.compute()[1].item()    # Vehicle IoU only!!!!
+            metric.reset()
+            log_dict[f"{mode}_bev_metric_iou_Time_Avg"] = iou_avg
+            self._wrap_loggers(
+                "log_metrics",
+                {f"{mode}/bev/metric_iou_Time_Avg": iou_avg},
+                step=self.current_epoch,
+            )
 
         log_dict["mean_metrics"] = sum([v for v in log_dict.values()]) / len(log_dict)
         
