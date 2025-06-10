@@ -222,7 +222,7 @@ class NuScenesDatamodule(pl.LightningDataModule):
             drop_last=self.train_drop_last,
             worker_init_fn=worker_rnd_init,
             pin_memory=self.pin_memory,
-            # prefetch_factor=self.prefetch_factor,
+            prefetch_factor=self.prefetch_factor,
             collate_fn=self.collate_fn,
         )
 
@@ -234,7 +234,7 @@ class NuScenesDatamodule(pl.LightningDataModule):
             drop_last=False,
             num_workers=self.num_workers,
             pin_memory=self.pin_memory,
-            # prefetch_factor=self.prefetch_factor,
+            prefetch_factor=self.prefetch_factor,
             collate_fn=self.collate_fn,
         )
 
