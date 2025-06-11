@@ -17,8 +17,8 @@ model_checkpoint:
   save_on_train_epoch_end: null
 
   dirpath: ${paths.output_dir}/checkpoints
-  monitor: "val_bev_metric_iou_Time_Pose_T0_P0" 
-  filename: '{epoch:03d}_{val_bev_metric_iou_Time_Pose_T0_P0:.4f}'
+  monitor: "val_vpq_metric" 
+  filename: '{epoch:03d}_{val_vpq_metric:.4f}'
   mode: "max"
   save_last: True
   auto_insert_metric_name: False
