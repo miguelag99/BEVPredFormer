@@ -123,7 +123,11 @@ class BEVPredFormerPredictor(Network):
             )
 
         # Optional: calculate egomotion info
-        if self.use_future_ego and "future_egomotion" in kwargs:
+        if (
+            self.use_future_ego
+            and "future_egomotion" in kwargs
+            and self.temporal is not None
+        ):
             future_egomotion = kwargs["future_egomotion"]
             b, s, c = future_egomotion.shape
             _, tin, _, h, w = bev_query.shape
