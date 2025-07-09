@@ -1,0 +1,27 @@
+# @package _global_
+
+defaults:
+  - _self_
+  - data: nuscenes_pred.yaml
+  - model: BEVPredFormerPredictor.yaml
+  - callbacks: default_pl.yaml
+  - plugins: null
+  - logger: default_pl.yaml
+  - trainer: ddp_pl.yaml
+  - paths: default.yaml
+  - extras: default.yaml
+  - hydra: default.yaml
+  - losses@model.loss_kwargs.segm_type: cewithlogit.yaml
+  - optional local: default.yaml
+  - debug: null
+
+# task name, determines output directory path
+task_name: "vis"
+
+tags: ["dev"]
+
+scene_ids: [0]
+
+flags:
+  debug: false
+  val_sparse: false
