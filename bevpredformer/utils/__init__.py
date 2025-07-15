@@ -13,4 +13,9 @@ from .object import (
 from .pylogger import get_pylogger
 from .rich_utils import enforce_tags, print_config_tree
 from .utils import extras, get_ckpt_from_path, get_metric_value, task_wrapper
-from .instance_pred import predict_instance_segmentation
+from .instance_pred import (
+    predict_instance_segmentation,
+    generate_gt_instance_segmentation,
+    generate_instance_colours,
+    plot_instance_map
+)

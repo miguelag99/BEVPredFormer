@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import hydra
+import shutil
 import pyrootutils
 import pytorch_lightning as L
 import torch
@@ -8,15 +9,16 @@ import imageio.v3 as imageio
 import matplotlib.pyplot as plt
 
 from typing import Optional, Dict
+from pathlib import Path
 from omegaconf import DictConfig
-from pytorch_lightning import LightningDataModule
+from pytorch_lightning import LightningDataModule, LightningModule
 from tqdm.auto import tqdm
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 
 pyrootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
 
 from bevpredformer import utils
-
+from visualize_batch import generate_gt_instance_pred
 
 log = utils.get_pylogger(__name__)
 
@@ -29,105 +31,76 @@ def visualise(cfg: DictConfig) -> None:
     cfg.data.prefetch_factor = 0
     cfg.data.num_workers = 1
     cfg.data.batch_size = 1
-    cfg.data.normalize_img = False
+    cfg.data.normalize_img = True
     # cfg.data.version = 'mini'
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     log.info(f"Instantiating datamodule <{cfg.data._target_}>")
     datamodule: LightningDataModule = hydra.utils.instantiate(cfg.data)
     datamodule.setup()
     dataset = datamodule.val_dataloader().dataset
+    
+    ckpt = utils.get_ckpt_from_path(cfg.ckpt.path)
+    
+    log.info(f"Instantiating model <{cfg.model._target_}>")
+    model: LightningModule = hydra.utils.instantiate(cfg.model)
+    model = utils.load_state_model(
+        model,
+        ckpt,
+        cfg.ckpt.model.freeze,
+        cfg.ckpt.model.load,
+        verbose=1,
+    ).to(device)
+    
+    # Remove the default output directory if it exists
+    output_path = Path(cfg.paths.output_dir)
+    if output_path.exists():
+        shutil.rmtree(output_path)
 
-    torch.backends.cudnn.benchmark = True
+    # Save it in the default visualization directory
+    output_path = Path(*output_path.parts[:-1])
+    
+    log.info(f"Output path: {output_path}")
+
     for scene_id in tqdm(cfg.scene_ids):
+        (output_path / f"scene_{scene_id}").mkdir(parents=True, exist_ok=True)
+        
         x = dataset[scene_id]
-        
-        img_names = cfg.data.img_params.cams
-        
-        imgs = x['imgs'][-1]  # Present images
-        bev_segments = x['binimg'][1:]  # BEV segment
-        
-        bev_segments_upsampled = []
-        for bev_segment in bev_segments:
-            # Use nearest neighbor interpolation to preserve class labels
-            upsampled = torch.nn.functional.interpolate(
-                bev_segment.unsqueeze(0),  # Add batch dimension
-                scale_factor=2.0,
-                mode='nearest'
-            ).squeeze(0)  # Remove batch dimension
-            bev_segments_upsampled.append(upsampled)
-        bev_segments = torch.stack(bev_segments_upsampled)
         
         instance_pred_map = generate_gt_instance_pred(
             bev_bounds= cfg.data.grid,
             batch=x
         )
-        # Upscale the instance prediction map by 2x
-        instance_pred_map = cv2.resize(instance_pred_map, 
-                                    (instance_pred_map.shape[1]*2, instance_pred_map.shape[0]*2), 
-                                    interpolation=cv2.INTER_NEAREST)
-        
 
-        # Create a figure with subplots for images and BEV segmentation
-        fig = plt.figure(figsize=(16, 8))
+        # Save instance prediction map using cv2
+        instance_pred_path = output_path / f"scene_{scene_id}" / "gt.png"
+        imageio.imwrite(str(instance_pred_path), instance_pred_map)
         
-        # Create a list to store frames for the GIF
-        frames = []
         
-        # For each timestep, create a frame
-        num_timesteps = len(bev_segments)
-        for t in range(num_timesteps):
-            # Create a figure for this timestep
-            frame_fig = plt.figure(figsize=(16, 8))
-            
-            # Plot the six camera images (using the most recent images)
-            for i, cam_name in enumerate(img_names):
-                ax = frame_fig.add_subplot(3, 3, i+1)
-                img = imgs[i].permute(1, 2, 0).cpu().numpy()
-                ax.imshow(img)
-                ax.set_title(cam_name)
-                ax.axis('off')
-            
-            # Plot the BEV segmentation for current timestep
-            ax = frame_fig.add_subplot(3, 3, 9)
-            bev = bev_segments[t].cpu().numpy()
-            bev = bev.squeeze(0)
-            ax.imshow(bev)
-            ax.set_title(f'BEV Segmentation (t={t})')
-            ax.axis('off')
-            
-            # Plot the gt final instance prediction
-            ax = frame_fig.add_subplot(3, 3, 8)
-            ax.imshow(instance_pred_map)
-            ax.set_title('Instance Prediction')
-            ax.axis('off')
+        # Move to device and add batch dimension
+        for k, v in x.items():
+            if isinstance(v, torch.Tensor):
+                x[k] = v.to(device).unsqueeze(0)
+                
+        with torch.inference_mode():
+            model.eval()
+            output = model(x)
 
-            # Add timestep indicator to figure title
-            frame_fig.suptitle(f"Scene: {scene_id} (Timestep {t+1}/{num_timesteps})")
-            
-            # Convert figure to image
-            canvas = FigureCanvas(frame_fig)
-            canvas.draw()
-            image = np.array(canvas.renderer.buffer_rgba())
-            
-            # Add frame to list
-            frames.append(image)
-            
-            # Close the figure to free memory
-            plt.close(frame_fig)
-        
-        # Save as GIF
-        gif_path = (
-            cfg.paths.output_dir + f"/scene_{scene_id}_animation.gif"
+        prediction = generate_val_instance_pred(
+            bev_bounds=cfg.data.grid,
+            batch=x,
+            output=output['bev']
         )
-        imageio.imwrite(gif_path, frames, duration=2000)  # 2 seconds per frame (in ms)
-        log.info(f"GIF animation saved to {gif_path}")
-        
-        plt.close(fig)
+                
+        inst_pred_path = output_path / f"scene_{scene_id}" / "prediction.png"
+        imageio.imwrite(str(inst_pred_path), prediction)
 
 
-def generate_gt_instance_pred(
+def generate_val_instance_pred(
     bev_bounds: DictConfig,
     batch: Dict,
+    output: Dict
 ) -> np.ndarray:
     # Bird's-eye view parameters
     bev_resolution = torch.tensor(
@@ -150,21 +123,24 @@ def generate_gt_instance_pred(
     bev_resolution, bev_start_position, bev_dimension = (
         bev_resolution.numpy(), bev_start_position.numpy(), bev_dimension.numpy()
     )
-
-    # Generate gt instance prediction
-    data = {
-        'segmentation': batch['binimg_aug'][1:].unsqueeze(0),
-        'instance_flow': batch['flow_map_aug'][1:].unsqueeze(0),
-        'centerness': batch['centerness_aug'][1:].unsqueeze(0),
-    }
     
-    consistent_instance_seg, matched_centers = utils.generate_gt_instance_segmentation(
+    ## Predicted instance prediction
+    output['binimg'] = output['binimg'][0,1:,:,:].unsqueeze(0)
+    output['flow'] = output['flow'][0,1:,:,:].unsqueeze(0)
+
+    data = {
+        'segmentation': output['binimg'],
+        'instance_flow': output['flow'],
+        'centerness': output['centerness']
+    }
+
+    consistent_instance_seg, matched_centers = utils.predict_instance_segmentation(
         data, compute_matched_centers=True,
         spatial_extent=(bev_bounds.xbound[1], bev_bounds.ybound[1])
     )
-    
+
     first_instance_seg = consistent_instance_seg[0, 1]
-    
+
     unique_ids = torch.unique(first_instance_seg).cpu().long().numpy()[1:]
     instance_map = dict(zip(unique_ids, unique_ids))
     instance_colours = utils.generate_instance_colours(instance_map)
@@ -193,8 +169,8 @@ def generate_gt_instance_pred(
     ).astype(np.int32)
     vis_image = cv2.fillPoly(vis_image, [pts], (0, 0, 0))
     vis_image = cv2.cvtColor(vis_image, cv2.COLOR_RGB2BGR)
-    return vis_image
     
+    return vis_image
 
 @hydra.main(version_base="1.3", config_path="../configs", config_name="visualize.yaml")
 def main(cfg: DictConfig) -> Optional[float]:
