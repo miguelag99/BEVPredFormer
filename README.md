@@ -2,7 +2,7 @@
 
 <div align=center>
   <a href="https://github.com/miguelag99/BEVPredFormer/blob/main/CHANGELOG.md">
-    <img src="https://img.shields.io/badge/Changelog-v1.0.0-2ea44f?style=for-the-badge" alt="CHANGELOG">
+    <img src="https://img.shields.io/badge/Changelog-v1.1.0-2ea44f?style=for-the-badge" alt="CHANGELOG">
   </a>
   <a href="https://pytorch.org">
     <img src="https://img.shields.io/badge/PyTorch-2.5.1-EE4C2C.svg?style=for-the-badge&logo=pytorch" alt="pytorch">
@@ -81,6 +81,26 @@ The different configuration parameters can be tuned in the different yaml files 
 It is recommended to use some of the pretrained models available:
 
 - BEVPredformer_Backbone_05.ckpt: Pretrained model with EfficientViT backbone for semantic segmentation (no prediction head). Recommended to use as a freezed backbone to train prediction models. Keys to load and freeze in train.yaml: `'net.backbone', 'net.neck', 'net.view_transform', 'net.decoder', 'net.coord_selector' and 'net.query_gen'`.
+
+## 3. Checkpoints
+
+### 3.1 Segmentation Checkpoints
+
+We provide several checkpoints for BEV semantic segmentation. The model uses three frame as input and predicts the semantic segmentation map for the current frame. These checkpoints are used later to train the prediction models.
+
+| Checkpoint Name | Description | IoU | Download Link |
+|-----------------|-------------|-----|--------------|
+| BEVPredformer_Backbone_effvitL2_03.ckpt  | Long range with img resolution of 224x480 | 41.90 | [Download](https://github.com/miguelag99/BEVPredFormer/releases/download/v1.0.0/BEVPredformer_Backbone_effvitL2_03.ckpt) |
+| BEVPredformer_Backbone_effvitL2_05.ckpt | Long range with img resolution of 448x800  | 44.11 | [Download](https://github.com/miguelag99/BEVPredFormer/releases/download/v1.0.0/BEVPredformer_Backbone_effvitL2_05.ckpt) |
+| BEVPredformer_Backbone_effvitL2_1.ckpt  | Long range with img resolution of 640x1600 | 44.17 | [Download](https://github.com/miguelag99/BEVPredFormer/releases/download/v1.0.0/BEVPredformer_Backbone_effvitL2_1.ckpt)  |
+| BEVPredformer_Backbone_effvitL2_05_short_range.ckpt  | Short range with img resolution of 448x800 | 70.25 | [Download](https://github.com/miguelag99/BEVPredFormer/releases/download/v1.0.0/BEVPredformer_Backbone_effvitL2_05_short_range.ckpt) |
+
+### 3.2 Prediction Checkpoints
+
+| Checkpoint Name | Description | IoU | VPQ | Download Link |
+|-----------------|-------------|-----|-----|---------------|
+| effvit_SpUnet_2TripletTST_256_ps4_scale05.ckpt | | 40.9 | 33.2 | [Download](https://github.com/miguelag99/BEVPredFormer/releases/download/v1.1.0/effvit_SpUnet_2TripletTST_256_ps4_scale05.ckpt) |
+| effvit_SpUnet_2TripletTST_256_ps4_scale03.ckpt | | 38.8 | 31.0 | [Download](https://github.com/miguelag99/BEVPredFormer/releases/download/v1.1.0/effvit_SpUnet_2TripletTST_256_ps4_scale03.ckpt) |
 
 ## Contact
 
