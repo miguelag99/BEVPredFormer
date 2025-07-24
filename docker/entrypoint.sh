@@ -44,7 +44,7 @@ CURRENT_USER=$(whoami)
 
 # Check if nuscenes dataset is available
 echo -e "🔍 Checking Nuscenes dataset availability..."
-if [ ! -d "/home/$CURRENT_USER/Datasets/nuscenes" ]; then
+if [ ! -d "/home/$CURRENT_USER/Datasets/nuscenes/samples" ]; then
     echo -e "❌ \033[91m\033[1mNuscenes dataset not found\033[0m"
     echo -e "   Please download it and place it in /home/$CURRENT_USER/Datasets/nuscenes or set the correspondign path in config files"
     exit 1
@@ -58,16 +58,16 @@ fi
 echo -e "\n🔍 Checking GPU and CUDA availability..."
 if ! python -c "import torch" 2>/dev/null; then
     echo -e "❌ \033[91m\033[1mFailed to import torch\033[0m"
-    echo -e "   Please check your PyTorch installation"
+    echo -e "   Please check your PyTorch installation!"
 else
-    python -c "import torch; print(f'✅ \033[92m\033[1mCUDA available: {torch.cuda.is_available()}\033[0m')"
-    
-    if python -c "import torch; exit(0 if torch.cuda.is_available() else 1)"; then
-        echo -e "✅ \033[92m\033[1mPyTorch is working properly with the GPU\033[0m"
+
+    CUDA_AVAILABLE=$(python -c "import torch; print(torch.cuda.is_available())")
+    if [ "$CUDA_AVAILABLE" == "True" ]; then
+        echo -e "✅ \033[92m\033[1mPyTorch is working properly with the GPU.\033[0m"
         echo -e "📍 GPU Information:"
-        python -c "import torch; print(f'   CUDA version: {torch.version.cuda}')"
-        python -c "import torch; print(f'   GPU device: {torch.cuda.get_device_name(0)}')"
-        python -c "import torch; print(f'   Available GPUs: {torch.cuda.device_count()}')"
+        python -c "import torch; print(f'   - CUDA version:     {torch.version.cuda}')"
+        python -c "import torch; print(f'   - Device name:      {torch.cuda.get_device_name(0)}')"
+        python -c "import torch; print(f'   - Number of GPUs:   {torch.cuda.device_count()}')"
     else
         echo -e "❌ \033[91m\033[1mCUDA is not available!\033[0m"
         echo -e "   Check your PyTorch installation"
