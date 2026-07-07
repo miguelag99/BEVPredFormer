@@ -1,21 +1,30 @@
-# BEVPredFormer
+# BEVPredFormer: Spatio-temporal Attention for BEV Instance Prediction in Autonomous Driving
+
+<p align="center">
+    <a href="https://www.miguelantunes.eu/">Miguel Antunes-García</a><sup>1</sup>,
+    <a href="https://www.santimontiel.eu/">Santiago Montiel-Marín</a><sup>1</sup>,
+    <a href="https://www.linkedin.com/in/fabio-sanchez-garcia/">Fabio Sánchez-García</a><sup>1</sup>,
+</p>
+<p align="center">
+    <a href="https://rodrigogutierrezm.github.io/">Rodrigo Gutiérrez-Moreno</a><sup>1</sup>,
+    <a href="https://scholar.google.es/citations?hl=es&user=IktmiSAAAAAJ">Rafael Barea</a><sup>1</sup>, and
+    <a href="http://www.robesafe.uah.es/personal/bergasa/">Luis M. Bergasa</a><sup>1</sup>
+</p>
+<p align="center" style="font-size: 0.9em; font-style: italic;">
+  <sup>1</sup> Universidad de Alcalá
+</p>
 
 <div align=center>
-  <a href="https://github.com/miguelag99/BEVPredFormer/blob/main/CHANGELOG.md">
     <img src="https://img.shields.io/badge/Changelog-v1.1.0-2ea44f?style=for-the-badge" alt="CHANGELOG">
-  </a>
-  <a href="https://pytorch.org">
     <img src="https://img.shields.io/badge/PyTorch-2.5.1-EE4C2C.svg?style=for-the-badge&logo=pytorch" alt="pytorch">
-  </a>
-  <a href="https://lightning.ai/docs/pytorch/stable/">
     <img src="https://img.shields.io/badge/Lightning-1.9.5-purple?style=for-the-badge&logo=lightning" alt="Lightning">
-  </a>
-  <a href="https://wandb.ai/">
+</div>
+<div align=center>
     <img src="https://img.shields.io/badge/Wandb-gray?style=for-the-badge&logo=weightsandbiases" alt="wandb">
-  </a>
-  <a href="https://www.docker.com">
     <img src="https://img.shields.io/badge/Docker-gray?style=for-the-badge&logo=docker&logoColor=white&labelColor=%23007FFF" alt="Docker">
-  </a>
+    <a href="https://arxiv.org/abs/2604.02930">
+      <img src="https://img.shields.io/badge/arxiv-black?style=for-the-badge&logo=arxiv" alt="arxiv">
+    </a>
 </div>
 
 Implementation of BEVPredFormer, a transformer-based model for predicting future trajectories in bird's-eye view (BEV) space.
@@ -101,6 +110,21 @@ We provide several checkpoints for BEV semantic segmentation. The model uses thr
 |-----------------|-------------|-----|-----|---------------|
 | effvit_SpUnet_2TripletTST_256_ps4_scale05.ckpt | | 40.9 | 33.2 | [Download](https://github.com/miguelag99/BEVPredFormer/releases/download/v1.1.0/effvit_SpUnet_2TripletTST_256_ps4_scale05.ckpt) |
 | effvit_SpUnet_2TripletTST_256_ps4_scale03.ckpt | | 38.8 | 31.0 | [Download](https://github.com/miguelag99/BEVPredFormer/releases/download/v1.1.0/effvit_SpUnet_2TripletTST_256_ps4_scale03.ckpt) |
+
+## Citation
+Please, consider citing thiw work with:
+
+```bibtex
+@misc{antunesgarcía2026bevpredformerspatiotemporalattentionbev,
+      title={BEVPredFormer: Spatio-temporal Attention for BEV Instance Prediction in Autonomous Driving}, 
+      author={Miguel Antunes-García and Santiago Montiel-Marín and Fabio Sánchez-García and Rodrigo Gutiérrez-Moreno and Rafael Barea and Luis M. Bergasa},
+      year={2026},
+      eprint={2604.02930},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV},
+      url={https://arxiv.org/abs/2604.02930}, 
+}
+```
 
 ## Contact
 
