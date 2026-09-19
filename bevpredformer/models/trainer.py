@@ -7,9 +7,9 @@ import torch
 import torch.nn as nn
 from omegaconf import DictConfig
 from psutil import virtual_memory
-from pytorch_lightning.core import LightningModule
-from pytorch_lightning.loggers.wandb import WandbLogger
-from pytorch_lightning.utilities import rank_zero_only
+from lightning.pytorch.core import LightningModule
+from lightning.pytorch.loggers.wandb import WandbLogger
+from lightning.pytorch.utilities.rank_zero import rank_zero_only
 from torch import Tensor
 from torch.cuda import max_memory_allocated, max_memory_reserved
 
@@ -473,7 +473,7 @@ class PredictionTrainer(LightningModule):
                 for index, (time, pose) in enumerate(self.bev_T_P):
                     metric = metric_dict[f"T{time}_P{pose}"]
                     # ! Trace all frames
-                    metric(
+                    metric.update(
                         pred_binimg[:, index].contiguous(),
                         target_binimg[:, index],
                         valid_binimg[:, index],
@@ -483,30 +483,30 @@ class PredictionTrainer(LightningModule):
                 cls_pred_binimg = torch.argmax(
                     pred_binimg.contiguous(), 2, keepdims=True
                 )
-                metric(
+                metric.update(
                    cls_pred_binimg[:, 1:] * valid_binimg[:, 1:],
                     target_binimg[:, 1:] * valid_binimg[:, 1:],
                 )
 
             if hasattr(self, f"metric_N_coarse_pts_{mode}"):
                 metric = getattr(self, "_".join(["metric_N_coarse_pts", mode]))
-                metric(preds["tracks"]["N_coarse"].unsqueeze(0))
+                metric.update(preds["tracks"]["N_coarse"].unsqueeze(0))
 
             if hasattr(self, f"metric_N_fine_pts_{mode}"):
                 metric = getattr(self, "_".join(["metric_N_fine_pts", mode]))
-                metric(preds["tracks"]["N_fine"].unsqueeze(0))
+                metric.update(preds["tracks"]["N_fine"].unsqueeze(0))
 
             if hasattr(self, f"metric_mem_{mode}"):
                 metric = getattr(self, "_".join(["metric_mem", mode]))
-                metric(torch.tensor([preds["tracks"]["mem"]]))
+                metric.update(torch.tensor([preds["tracks"]["mem"]]))
 
             if hasattr(self, f"metric_mem_r_{mode}"):
                 metric = getattr(self, "_".join(["metric_mem_r", mode]))
-                metric(torch.tensor([preds["tracks"]["mem_r"]]))
+                metric.update(torch.tensor([preds["tracks"]["mem_r"]]))
 
             if hasattr(self, f"metric_pts_thresh_{mode}"):
                 metric = getattr(self, "_".join(["metric_pts_thresh", mode]))
-                metric(
+                metric.update(
                     torch.tensor(
                         [
                             torch.where(preds["bev"]["binimg"] > self.pts_thresh)[
@@ -522,7 +522,7 @@ class PredictionTrainer(LightningModule):
                     self, "_".join(["metric_iou_per_dynamic_tag", mode])
                 )
                 for metric in metric_dict.values():
-                    metric(pred_binimg, target_binimg, batch["mobility"] * valid_binimg)
+                    metric.update(pred_binimg, target_binimg, batch["mobility"] * valid_binimg)
 
             # -> Per visibility tag
             if hasattr(self, f"metric_iou_per_visibility_{mode}"):
@@ -530,7 +530,7 @@ class PredictionTrainer(LightningModule):
                     self, "_".join(["metric_iou_per_visibility", mode])
                 )
                 for metric in metric_dict.values():
-                    metric(
+                    metric.update(
                         pred_binimg, target_binimg, batch["visibility"] * valid_binimg
                     )
 
@@ -541,7 +541,7 @@ class PredictionTrainer(LightningModule):
                 metric_dict = getattr(self, "_".join(["metric_iou_hdmap", mode]))
                 for v, k in enumerate(self.hdmap_names):
                     metric = metric_dict[k]
-                    metric(
+                    metric.update(
                         pred_binimg_hdmap[:, :, v : v + 1].contiguous(),
                         batch["hdmap"][:, :, v : v + 1].contiguous(),
                     )
@@ -559,7 +559,7 @@ class PredictionTrainer(LightningModule):
                     spatial_extent = (self.grid["xbound"][1], self.grid["ybound"][1]),
                 )
 
-                metric(
+                metric.update(
                     pred_instance_seg[:,1:],
                     batch["instance"][:,1:].squeeze(2).long()
                 )

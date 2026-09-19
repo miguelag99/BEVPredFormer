@@ -20,7 +20,7 @@ class IoUMetric(Metric):
             passing "None" will ignore the mask
             otherwise uses visibility values to ignore certain labels
         """
-        super().__init__(dist_sync_on_step=False, compute_on_step=False)
+        super().__init__(dist_sync_on_step=False)
 
         self.thresholds = thresholds
         self.exact_value_mask = exact_value_mask

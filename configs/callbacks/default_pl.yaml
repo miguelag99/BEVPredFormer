@@ -1,13 +1,13 @@
 rich_progress_bar:
-  _target_: pytorch_lightning.callbacks.RichProgressBar
+  _target_: lightning.pytorch.callbacks.RichProgressBar
   refresh_rate: 20
 
 learning_rate_monitor:
-  _target_:  pytorch_lightning.callbacks.LearningRateMonitor
+  _target_:  lightning.pytorch.callbacks.LearningRateMonitor
   logging_interval: step
 
 model_checkpoint:
-  _target_: pytorch_lightning.callbacks.ModelCheckpoint
+  _target_: lightning.pytorch.callbacks.ModelCheckpoint
   verbose: False 
   save_top_k: 1 
   save_weights_only: False 
@@ -24,5 +24,5 @@ model_checkpoint:
   auto_insert_metric_name: False
 
 model_summary:
-  _target_: pytorch_lightning.callbacks.RichModelSummary
+  _target_: lightning.pytorch.callbacks.RichModelSummary
   max_depth: 3

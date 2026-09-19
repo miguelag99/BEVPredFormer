@@ -1,7 +1,7 @@
 import timm
 
 from collections import OrderedDict
-from pytorch_lightning.utilities import rank_zero_only
+from lightning.pytorch.utilities.rank_zero import rank_zero_only
 
 from bevpredformer.models.img_encoder.backbones.common import Backbone
 

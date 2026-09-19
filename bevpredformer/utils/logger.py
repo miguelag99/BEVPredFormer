@@ -4,7 +4,7 @@ File to process images and tensors for logging / saving.
 
 import torch
 from einops import rearrange, repeat
-from pytorch_lightning.utilities import rank_zero_only
+from lightning.pytorch.utilities.rank_zero import rank_zero_only
 from torchvision.utils import draw_keypoints, make_grid
 
 from bevpredformer.utils import pylogger

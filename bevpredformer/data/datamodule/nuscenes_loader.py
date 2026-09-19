@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import List, Optional
 
 import numpy as np
-import pytorch_lightning as pl
+import lightning as pl
 import torch
 from einops import rearrange
 from nuscenes.nuscenes import NuScenes

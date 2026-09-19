@@ -3,7 +3,7 @@ import numpy as np
 import hydra
 import shutil
 import pyrootutils
-import pytorch_lightning as L
+import lightning as L
 import torch
 import imageio.v3 as imageio
 import matplotlib.pyplot as plt
@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 from typing import Optional, Dict
 from pathlib import Path
 from omegaconf import DictConfig
-from pytorch_lightning import LightningDataModule, LightningModule
+from lightning.pytorch import LightningDataModule, LightningModule
 from tqdm.auto import tqdm
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 

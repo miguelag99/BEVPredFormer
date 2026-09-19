@@ -21,7 +21,7 @@ from nuscenes.utils.data_classes import Box
 from nuscenes.utils.geometry_utils import BoxVisibility, transform_matrix
 from nuscenes.utils.splits import create_splits_scenes
 from pyquaternion import Quaternion
-from pytorch_lightning.utilities import rank_zero_only
+from lightning.pytorch.utilities.rank_zero import rank_zero_only
 
 from bevpredformer.utils.geom import (
     GeomScaler,

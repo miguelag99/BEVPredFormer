@@ -7,12 +7,12 @@ from typing import List, Optional, Tuple
 
 import hydra
 import pyrootutils
-import pytorch_lightning as L
+import lightning as L
 import torch
 from omegaconf import DictConfig
-from pytorch_lightning import LightningDataModule, Trainer, Callback
-from pytorch_lightning.loggers import Logger
-from pytorch_lightning.profiler import PyTorchProfiler
+from lightning.pytorch import LightningDataModule, Trainer, Callback
+from lightning.pytorch.loggers import Logger
+from lightning.pytorch.profilers import PyTorchProfiler
 
 import matplotlib.pyplot as plt
 

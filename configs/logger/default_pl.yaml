@@ -1,5 +1,5 @@
 wandb:
-  _target_: pytorch_lightning.loggers.wandb.WandbLogger
+  _target_: lightning.pytorch.loggers.wandb.WandbLogger
   id: null
   anonymous: null 
   project: "bevpredformer"
@@ -15,7 +15,7 @@ wandb:
   offline: True
 
 tensorboard:
-  _target_: pytorch_lightning.loggers.tensorboard.TensorBoardLogger
+  _target_: lightning.pytorch.loggers.tensorboard.TensorBoardLogger
   log_graph: False
   prefix: ""
   save_dir: ${hydra:run.dir}

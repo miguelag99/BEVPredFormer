@@ -1,7 +1,7 @@
 import functools
 
 import torch
-from pytorch_lightning.utilities import rank_zero_only
+from lightning.pytorch.utilities.rank_zero import rank_zero_only
 from torch import nn
 
 
