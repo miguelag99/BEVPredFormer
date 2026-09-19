@@ -46,7 +46,7 @@ net:
   projector:
     _target_: bevpredformer.models.projector.BevFormerProjector
     spatial_bounds:  [-49.75, 49.75, -49.75, 49.75, -3.375, 5.375]
-    # spatial_bounds:  [-14,925, 14,925, -14,925, 14,925, -3.375, 5.375]
+    # spatial_bounds:  [-14.925, 14.925, -14.925, 14.925, -3.375, 5.375]
 
   view_transform:
     _target_: bevpredformer.models.view_transform.attention.DefAttnVT
