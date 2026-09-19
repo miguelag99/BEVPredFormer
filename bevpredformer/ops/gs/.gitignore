@@ -1,8 +1,0 @@
-build/*
-dist/*
-sparse_gs.egg-info/*
-.vscode/
-.pytest_cache/
-__pycache__/
-*/__pycache__/
-functions/__pycache__/*

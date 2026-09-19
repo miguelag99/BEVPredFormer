@@ -33,7 +33,7 @@ img_params:
     - 'CAM_BACK'
     - 'CAM_BACK_RIGHT'
   Ncams: 6
-  min_visibility: 1
+  min_visibility: 2
   update_intrinsics: True
   downsample: ${model.net.backbone.downsample}
 
