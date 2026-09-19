@@ -36,6 +36,10 @@ seed: null
 
 log_every_n_steps: 50 
 
+# Validation runs in bf16 mixed precision (override with trainer.precision=32)
+trainer:
+  precision: bf16-mixed
+
 flags:
   debug: false
   val_sparse: false

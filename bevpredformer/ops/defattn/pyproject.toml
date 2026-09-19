@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=77", "wheel", "torch>=2.6.0", "numpy==1.26.4"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "MultiScaleDeformableAttention"
+version = "1.0"
+description = "PyTorch Wrapper for CUDA Functions of Multi-Scale Deformable Attention"
+authors = [
+    { name = "Weijie Su" }
+]
+requires-python = ">=3.8"
+dependencies = [
+    "torch>=2.6.0",
+    "torchvision"
+]
+
