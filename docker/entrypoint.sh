@@ -2,40 +2,14 @@
 
 clear
 
-# Define paths
-OPS_PATH="/home/perception/workspace/bevpredformer/ops"
-
-# Check if build directories exist
-if [ ! -d "${OPS_PATH}/defattn/build" ] || \
-   [ ! -d "${OPS_PATH}/defattn/dist" ] || \
-   [ ! -d "${OPS_PATH}/gs/build" ] || \
-   [ ! -d "${OPS_PATH}/gs/dist" ]; then
-  
-  echo -e "\033[93mBuilding and installing CUDA operations...\033[0m"
-  
-  # Grid Sampling
-  cd "${OPS_PATH}/gs" && python setup.py build install --user && cd - || echo "Error building Grid Sampling"
-  
-  # Defformable Attention
-  cd "${OPS_PATH}/defattn" && python setup.py build install --user && cd - || echo "Error building Defformable Attention"
-
-else
-  # Check if modules are already installed
-  if ! python -c "import importlib.util; exit(0 if importlib.util.find_spec('MultiScaleDeformableAttention') and importlib.util.find_spec('sparse_gs') else 1)"; then
-    echo -e "\033[93mAlready built CUDA ops, installing...\033[0m"
-
-    # Grid Sampling
-    cd "${OPS_PATH}/gs" && python setup.py install --user && cd - || echo "Error installing Grid Sampling"
-
-    # Defformable Attention
-    cd "${OPS_PATH}/defattn" && python setup.py install --user && cd - || echo "Error installing Defformable Attention"
-  else
-    echo -e "\033[92mCUDA Operations already installed.\033[0m"
-  fi
+# Update uv project installation
+if [ ! -d ".venv" ]; then
+  echo " .venv not found — updating virtual environment..."
+  uv sync --link-mode=copy
+  echo " ✅ .venv updated"
 fi
 
-clear
-
+echo -e "\n-----------------------------------------------------------------------------------------\n"
 figlet -c "BEVPredFormer"
 echo -e "\n------------------------------------ System info ----------------------------------------\n"
 
@@ -56,18 +30,17 @@ fi
 
 # Check if CUDA is available
 echo -e "\n🔍 Checking GPU and CUDA availability..."
-if ! python -c "import torch" 2>/dev/null; then
+if ! uv run python -c "import torch" 2>/dev/null; then
     echo -e "❌ \033[91m\033[1mFailed to import torch\033[0m"
     echo -e "   Please check your PyTorch installation!"
 else
-
-    CUDA_AVAILABLE=$(python -c "import torch; print(torch.cuda.is_available())")
+    CUDA_AVAILABLE=$(uv run python -c "import torch; print(torch.cuda.is_available())")
     if [ "$CUDA_AVAILABLE" == "True" ]; then
         echo -e "✅ \033[92m\033[1mPyTorch is working properly with the GPU.\033[0m"
         echo -e "📍 GPU Information:"
-        python -c "import torch; print(f'   - CUDA version:     {torch.version.cuda}')"
-        python -c "import torch; print(f'   - Device name:      {torch.cuda.get_device_name(0)}')"
-        python -c "import torch; print(f'   - Number of GPUs:   {torch.cuda.device_count()}')"
+        uv run python -c "import torch; print(f'   - CUDA version:     {torch.version.cuda}')"
+        uv run python -c "import torch; print(f'   - Device name:      {torch.cuda.get_device_name(0)}')"
+        uv run python -c "import torch; print(f'   - Number of GPUs:   {torch.cuda.device_count()}')"
     else
         echo -e "❌ \033[91m\033[1mCUDA is not available!\033[0m"
         echo -e "   Check your PyTorch installation"
@@ -76,4 +49,5 @@ fi
 
 echo -e "\n-----------------------------------------------------------------------------------------\n"
 
+ulimit -n 65535
 /bin/bash

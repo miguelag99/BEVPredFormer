@@ -15,12 +15,14 @@
 </p>
 
 <div align=center>
-    <img src="https://img.shields.io/badge/Changelog-v1.1.0-2ea44f?style=for-the-badge" alt="CHANGELOG">
-    <img src="https://img.shields.io/badge/PyTorch-2.5.1-EE4C2C.svg?style=for-the-badge&logo=pytorch" alt="pytorch">
-    <img src="https://img.shields.io/badge/Lightning-1.9.5-purple?style=for-the-badge&logo=lightning" alt="Lightning">
+    <img src="https://img.shields.io/badge/Changelog-v1.2.0-2ea44f?style=for-the-badge" alt="CHANGELOG">
+    <img src="https://img.shields.io/badge/PyTorch-2.8.0-EE4C2C.svg?style=for-the-badge&logo=pytorch" alt="pytorch">
+    <img src="https://img.shields.io/badge/Lightning-2.5.4-purple?style=for-the-badge&logo=lightning" alt="Lightning">
 </div>
 <div align=center>
     <img src="https://img.shields.io/badge/Wandb-gray?style=for-the-badge&logo=weightsandbiases" alt="wandb">
+    <img src="https://img.shields.io/badge/CUDA-12.9-76B900?style=for-the-badge&logo=nvidia" alt="CUDA">
+    <img src="https://img.shields.io/badge/uv-gray?style=for-the-badge&logo=uv" alt="uv">
     <img src="https://img.shields.io/badge/Docker-gray?style=for-the-badge&logo=docker&logoColor=white&labelColor=%23007FFF" alt="Docker">
     <a href="https://arxiv.org/abs/2604.02930">
       <img src="https://img.shields.io/badge/arxiv-black?style=for-the-badge&logo=arxiv" alt="arxiv">
@@ -56,7 +58,11 @@ NUSCENES_PATH = /path/to/nuscenes
 
 ## 2. Installation and Usage
 
-Build the Docker image with the following command:
+The environment is managed with [uv](https://docs.astral.sh/uv/) and uses PyTorch 2.8 with CUDA 12.9. All dependencies are defined in `pyproject.toml` and pinned in `uv.lock`.
+
+### 2.1 Docker (recommended)
+
+Build the Docker image (CUDA 12.9 devel + uv) with the following command:
 
 ```bash
 make build
@@ -75,15 +81,35 @@ Once the image is built, you can run the container with the following command:
 make run
 ```
 
-This command will run a bash inside the container and mount the current directory and dataset inside the container.
+This command will run a bash inside the container and mount the current directory and dataset inside the container. The first time the container is launched, the entrypoint runs `uv sync`, which creates the `.venv` inside the repository and compiles the Multi-Scale Deformable Attention CUDA op. Following runs reuse the existing `.venv`.
 
-### 2.1 Training
+> **Note:** the `.venv` is created for the container's Python. If you also create one outside the container, delete it (`rm -rf .venv`) before launching the container so it can be rebuilt.
+
+### 2.2 Local installation (without Docker)
+
+Requirements: [uv](https://docs.astral.sh/uv/getting-started/installation/), an NVIDIA driver compatible with CUDA 12.9 and the CUDA 12.9 toolkit (`nvcc`) to compile the deformable attention op.
+
+```bash
+uv sync
+```
+
+### 2.3 Training
 
 To train any version of BEVPredFormer, you can use the following command inside the Docker container:
 
 ```bash
-python bevpredformer/train.py
+uv run python bevpredformer/train.py
 ```
+
+### 2.4 Validation
+
+To evaluate a checkpoint (path configured in `configs/val.yaml`):
+
+```bash
+uv run python bevpredformer/val.py
+```
+
+Validation runs with `bf16-mixed` precision by default. Use `trainer.precision=32` to evaluate in full precision.
 
 The different configuration parameters can be tuned in the different yaml files located in the *configs* directory.
 
