@@ -115,7 +115,7 @@ To evaluate a checkpoint (path configured in `configs/val.yaml`):
 uv run python bevpredformer/val.py
 ```
 
-Validation runs with `bf16-mixed` precision by default. Use `trainer.precision=32` to evaluate in full precision.
+Validation runs in full precision (`32`) by default. Use `trainer.precision=bf16-mixed` for a faster run, which scores about 0.004 VPQ lower.
 
 The different configuration parameters can be tuned in the different yaml files located in the *configs* directory.
 
