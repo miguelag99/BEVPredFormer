@@ -38,7 +38,7 @@ class SparseBasicBlock(spconv.SparseModule):
         self.activ = spconv.SparseReLU(inplace=True)
         self.downsample = downsample
         self.iden_for_fx_match = spconv.SparseIdentity()
-        self.skip = in_c == out_c
+        self.skip = (in_c == out_c) or (downsample is not None)
 
     def forward(self, x: spconv.SparseConvTensor):
         identity = x
@@ -59,7 +59,12 @@ class SparseBasicBlock(spconv.SparseModule):
 # 2D UNet
 class SparseEncoder(nn.Module):
     def __init__(
-        self, in_c, mid_c=64, down_mode="maxpool", with_large_kernels: bool = False
+        self,
+        in_c,
+        mid_c=64,
+        down_mode="maxpool",
+        with_large_kernels: bool = False,
+        with_proj_residual: bool = False,
     ):
         super().__init__()
         # Activation
@@ -84,7 +89,9 @@ class SparseEncoder(nn.Module):
                 downsample=spconv.SparseSequential(
                     spconv.SubMConv2d(mid_c, mid_c_lev2, 1, bias=False, algo=algo),
                     activ(mid_c_lev2, momentum=0.1),
-                ),
+                )
+                if with_proj_residual
+                else None,
             ),
             SparseBasicBlock(mid_c_lev2, mid_c_lev2, kernels=[k, k]),
         )
@@ -99,7 +106,9 @@ class SparseEncoder(nn.Module):
                 downsample=spconv.SparseSequential(
                     spconv.SubMConv2d(mid_c_lev2, mid_c_lev3, 1, bias=False, algo=algo),
                     activ(mid_c_lev3, momentum=0.1),
-                ),
+                )
+                if with_proj_residual
+                else None,
             ),
             SparseBasicBlock(mid_c_lev3, mid_c_lev3, kernels=[3, 3]),
         )
@@ -200,10 +209,13 @@ class SparseUNet(nn.Module):
         with_tail_conv: bool = False,
         with_large_kernels: bool = False,
         with_decoder_bias: bool = False,
+        with_proj_residual: bool = False,
     ):
         super().__init__()
         self.register_forward_hook(debug_hook)
-        self.encoder = SparseEncoder(in_c, mid_c, "maxpool", with_large_kernels)
+        self.encoder = SparseEncoder(
+            in_c, mid_c, "maxpool", with_large_kernels, with_proj_residual
+        )
         self.decoder = SparseDecoder(mid_c, in_c, with_large_kernels, with_decoder_bias)
         self.in_c = in_c
 

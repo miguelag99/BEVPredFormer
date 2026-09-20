@@ -6,7 +6,7 @@ min_epochs: 1 # prevents early stopping
 
 deterministic: False
 
-strategy: ddp_find_unused_parameters_true
+strategy: ddp
 
 max_epochs: 100
 

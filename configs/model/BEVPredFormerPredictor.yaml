@@ -50,7 +50,7 @@ net:
 
   view_transform:
     _target_: bevpredformer.models.view_transform.attention.DefAttnVT
-    n_layers: 6 
+    n_layers: 1
     query_c: ${model.net.out_c.query_gen}
     ffn_dim: 1024
     sa_defattn_kwargs:

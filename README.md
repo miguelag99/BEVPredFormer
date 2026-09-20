@@ -99,6 +99,16 @@ If you modify the CUDA sources of the deformable attention op, `uv sync` will no
 uv sync --reinstall-package multiscaledeformableattention
 ```
 
+### 2.2.1 Checkpoint migration
+
+Checkpoints released before v1.2.0 store six view transform layers, of which only the last one ever affected the output (the view transform did not feed each layer's output into the next). The current model builds a single layer, so those checkpoints need a one-off conversion:
+
+```bash
+uv run scripts/migrate_checkpoint.py checkpoints/<name>.ckpt
+```
+
+This writes `<name>_1layer.ckpt` next to the original and never modifies the input. The BEV outputs are unchanged.
+
 ### 2.3 Training
 
 To train any version of BEVPredFormer, you can use the following command inside the Docker container:

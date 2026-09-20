@@ -14,7 +14,10 @@ class EfficientVit(Backbone):
         
         assert downsample == 8, "Currently only supported for downsample 8"
 
-        self.model = timm.create_model(version, pretrained=True, features_only=True)
+        # Only the first three stages are consumed by the neck. Building the last
+        # one leaves it without gradient, which DDP reports as an unused parameter.
+        self.model = timm.create_model(version, pretrained=True, features_only=True,
+                                       out_indices=(0, 1, 2))
         message = f"EfficientVit exists and is loaded at version {version}"
         self._print_loaded_file(message)
 
@@ -28,14 +31,12 @@ class EfficientVit(Backbone):
         endpoints = dict()
 
         res = self.model(x)
-        endpoints["reduction_1"] = res[0]
-        endpoints["reduction_2"] = res[1]
-        endpoints["reduction_3"] = res[2]
-        endpoints["reduction_4"] = res[3]
+        for i, feat in enumerate(res):
+            endpoints[f"reduction_{i + 1}"] = feat
 
         if not return_all:
             list_keys =  ["reduction_2", "reduction_3"]
         else:
-            list_keys = ["reduction_1", "reduction_2", "reduction_3", "reduction_4"]
+            list_keys = list(endpoints.keys())
 
         return OrderedDict({f"out{i}": endpoints[k] for i, k in enumerate(list_keys)})

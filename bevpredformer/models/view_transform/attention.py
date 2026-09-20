@@ -91,6 +91,8 @@ class DefAttnVT(nn.Module):
 
             queries = self.last_norm_layers[i](queries)
 
+            query = queries
+
         queries = rearrange(queries, "(b nq) Nq c -> b nq Nq c", b=b, nq=nq)
         mask = None
         return queries, mask
