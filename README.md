@@ -93,6 +93,12 @@ Requirements: [uv](https://docs.astral.sh/uv/getting-started/installation/), an 
 uv sync
 ```
 
+If you modify the CUDA sources of the deformable attention op, `uv sync` will not rebuild it. Force the rebuild with:
+
+```bash
+uv sync --reinstall-package multiscaledeformableattention
+```
+
 ### 2.3 Training
 
 To train any version of BEVPredFormer, you can use the following command inside the Docker container:
