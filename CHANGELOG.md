@@ -6,6 +6,7 @@
   - Multi-Scale Deformable Attention op with fp16/bf16 support (`trainer.precision=bf16-mixed`).
   - Removed unused sparse grid sample op (`ops/gs`) and `GridSampleVT`.
   - Default `min_visibility` set to 2 in data configs.
+  - Instance post-processing from TGRIP: centerness added to the center scores, configurable `conf_threshold` and `nms_kernel_size` (`model.postproc_kwargs`).
 - **v1.1.0** (07-2025)
   - Multiple validation and plotting scripts.
   - Uploaded BEVPredFormer weights.

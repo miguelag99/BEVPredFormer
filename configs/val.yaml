@@ -85,3 +85,7 @@ model:
     bev_T_P: ${data.bev_T_P}
 
   grid: ${data.grid}
+
+  postproc_kwargs:
+    conf_threshold: 0.1
+    nms_kernel_size: 5   # null -> uses default: round(350 / spatial_extent[0])
