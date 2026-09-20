@@ -12,6 +12,8 @@ script rewrites a checkpoint to say so:
     since the fixed model no longer builds them
   - optimizer / scheduler / loop state is dropped, because its parameter indices
     are positional and would silently land on the wrong tensors after the above
+  - epoch / global_step are dropped too, since without the loop state they
+    cannot resume a run and would only misreport where the weights came from
 
 The result is a warm-start checkpoint for a model configured with
 model.net.view_transform.n_layers=1. The BEV outputs are unchanged.
@@ -50,8 +52,16 @@ DROP_PREFIXES = (
     "net.decoder.encoder.layer_3.0.downsample.",
 )
 
-# Training state keyed by parameter position, invalid once tensors are removed.
-DROP_TOP_LEVEL = ("optimizer_states", "lr_schedulers", "loops", "callbacks")
+# Training state keyed by parameter position, invalid once tensors are removed,
+# plus the counters that only make sense together with that state.
+DROP_TOP_LEVEL = (
+    "optimizer_states",
+    "lr_schedulers",
+    "loops",
+    "callbacks",
+    "epoch",
+    "global_step",
+)
 
 
 def _split_vt_key(key):
