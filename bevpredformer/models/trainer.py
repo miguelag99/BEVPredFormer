@@ -567,9 +567,11 @@ class PredictionTrainer(LightningModule):
                     nms_kernel_size=self._nms_kernel_size,
                 )
 
+                # Only score the valid (visible) region
+                valid_instance = batch["valid_binimg"]
                 metric.update(
-                    pred_instance_seg[:,1:],
-                    batch["instance"][:,1:].squeeze(2).long()
+                    (pred_instance_seg[:,1:] * valid_instance[:,1:].squeeze(2)).long(),
+                    (batch["instance"][:,1:] * valid_instance[:,1:]).squeeze(2).long()
                 )
 
     def _init_preds_dict_for_vis(self, preds):
