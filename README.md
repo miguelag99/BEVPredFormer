@@ -15,7 +15,7 @@
 </p>
 
 <div align=center>
-    <img src="https://img.shields.io/badge/Changelog-v1.2.0-2ea44f?style=for-the-badge" alt="CHANGELOG">
+    <img src="https://img.shields.io/badge/Changelog-v2.0.0-2ea44f?style=for-the-badge" alt="CHANGELOG">
     <img src="https://img.shields.io/badge/PyTorch-2.8.0-EE4C2C.svg?style=for-the-badge&logo=pytorch" alt="pytorch">
     <img src="https://img.shields.io/badge/Lightning-2.5.4-purple?style=for-the-badge&logo=lightning" alt="Lightning">
 </div>
