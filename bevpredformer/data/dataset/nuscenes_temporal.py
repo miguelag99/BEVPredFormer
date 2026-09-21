@@ -9,7 +9,7 @@ from typing import Any, Dict, List, Tuple
 import numpy as np
 import numpy.typing as npt
 import torch
-from pytorch_lightning.utilities import rank_zero_only
+from lightning.pytorch.utilities.rank_zero import rank_zero_only
 
 from bevpredformer.data.dataset.nuscenes_common import CAMREF, NuScenesDataset
 from bevpredformer.utils.geom import (

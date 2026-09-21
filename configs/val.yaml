@@ -36,6 +36,10 @@ seed: null
 
 log_every_n_steps: 50 
 
+# Full precision by default (override with trainer.precision=bf16-mixed for a faster run)
+trainer:
+  precision: 32
+
 flags:
   debug: false
   val_sparse: false
@@ -81,3 +85,7 @@ model:
     bev_T_P: ${data.bev_T_P}
 
   grid: ${data.grid}
+
+  postproc_kwargs:
+    conf_threshold: 0.1
+    nms_kernel_size: 5   # null -> uses default: round(350 / spatial_extent[0])

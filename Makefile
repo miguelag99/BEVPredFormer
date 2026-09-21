@@ -3,6 +3,7 @@ TAG_NAME := v1
 IMAGE_NAME := bevpredformer
 
 WANDB_API_KEY := $(shell echo $$WANDB_API_KEY)
+HF_TOKEN := $(shell echo $$HF_TOKEN)
 UID := $(shell id -u)
 GID := $(shell id -g)
 NUSCENES_PATH := ~/path/to/nuscenes
@@ -20,6 +21,7 @@ define run_docker
 		-v ./:/home/$(USER_NAME)/workspace \
 		-v $(NUSCENES_PATH):/home/$(USER_NAME)/Datasets/nuscenes \
 		-e WANDB_API_KEY=$(WANDB_API_KEY) \
+		-e HF_TOKEN=$(HF_TOKEN) \
 		'$(IMAGE_NAME)':$(TAG_NAME) \
 		/bin/bash -c $(1)
 endef
@@ -35,6 +37,8 @@ define run_docker_dgx
 		-u $(USER_NAME) \
 		-v ./:/home/$(USER_NAME)/workspace \
 		-v $(NUSCENES_PATH):/home/$(USER_NAME)/Datasets/nuscenes \
+		-e WANDB_API_KEY=$(WANDB_API_KEY) \
+		-e HF_TOKEN=$(HF_TOKEN) \
 		$(IMAGE_NAME):$(TAG_NAME) \
 		/bin/bash -c $(1)
 endef

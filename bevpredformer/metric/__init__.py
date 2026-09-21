@@ -7,7 +7,7 @@ from .temporal import PanopticMetric
 
 class MeanMetric(Metric):
     def __init__(self):
-        super().__init__(dist_sync_on_step=False, compute_on_step=False)
+        super().__init__(dist_sync_on_step=False)
         self.add_state("metric", default=torch.zeros(1), dist_reduce_fx="sum")
         self.add_state("n_obs", default=torch.zeros(1), dist_reduce_fx="sum")
         return

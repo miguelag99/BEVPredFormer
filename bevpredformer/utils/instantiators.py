@@ -3,8 +3,8 @@ from typing import List
 import hydra
 from omegaconf import DictConfig
 from bevpredformer.utils import pylogger
-from pytorch_lightning import Callback
-from pytorch_lightning.loggers import Logger
+from lightning.pytorch import Callback
+from lightning.pytorch.loggers import Logger
 
 log = pylogger.get_pylogger(__name__)
 

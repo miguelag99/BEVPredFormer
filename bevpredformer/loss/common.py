@@ -2,7 +2,7 @@ import pdb
 from typing import Dict, List, Union
 
 import torch
-from pytorch_lightning.utilities import rank_zero_only
+from lightning.pytorch.utilities.rank_zero import rank_zero_only
 from torch import nn
 
 from bevpredformer.utils import get_element_from_nested_key, unpack_nested_dict

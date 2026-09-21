@@ -15,12 +15,14 @@
 </p>
 
 <div align=center>
-    <img src="https://img.shields.io/badge/Changelog-v1.1.0-2ea44f?style=for-the-badge" alt="CHANGELOG">
-    <img src="https://img.shields.io/badge/PyTorch-2.5.1-EE4C2C.svg?style=for-the-badge&logo=pytorch" alt="pytorch">
-    <img src="https://img.shields.io/badge/Lightning-1.9.5-purple?style=for-the-badge&logo=lightning" alt="Lightning">
+    <img src="https://img.shields.io/badge/Changelog-v1.2.0-2ea44f?style=for-the-badge" alt="CHANGELOG">
+    <img src="https://img.shields.io/badge/PyTorch-2.8.0-EE4C2C.svg?style=for-the-badge&logo=pytorch" alt="pytorch">
+    <img src="https://img.shields.io/badge/Lightning-2.5.4-purple?style=for-the-badge&logo=lightning" alt="Lightning">
 </div>
 <div align=center>
     <img src="https://img.shields.io/badge/Wandb-gray?style=for-the-badge&logo=weightsandbiases" alt="wandb">
+    <img src="https://img.shields.io/badge/CUDA-12.9-76B900?style=for-the-badge&logo=nvidia" alt="CUDA">
+    <img src="https://img.shields.io/badge/uv-gray?style=for-the-badge&logo=uv" alt="uv">
     <img src="https://img.shields.io/badge/Docker-gray?style=for-the-badge&logo=docker&logoColor=white&labelColor=%23007FFF" alt="Docker">
     <a href="https://arxiv.org/abs/2604.02930">
       <img src="https://img.shields.io/badge/arxiv-black?style=for-the-badge&logo=arxiv" alt="arxiv">
@@ -56,7 +58,11 @@ NUSCENES_PATH = /path/to/nuscenes
 
 ## 2. Installation and Usage
 
-Build the Docker image with the following command:
+The environment is managed with [uv](https://docs.astral.sh/uv/) and uses PyTorch 2.8 with CUDA 12.9. All dependencies are defined in `pyproject.toml` and pinned in `uv.lock`.
+
+### 2.1 Docker (recommended)
+
+Build the Docker image (CUDA 12.9 devel + uv) with the following command:
 
 ```bash
 make build
@@ -75,15 +81,41 @@ Once the image is built, you can run the container with the following command:
 make run
 ```
 
-This command will run a bash inside the container and mount the current directory and dataset inside the container.
+This command will run a bash inside the container and mount the current directory and dataset inside the container. The first time the container is launched, the entrypoint runs `uv sync`, which creates the `.venv` inside the repository and compiles the Multi-Scale Deformable Attention CUDA op. Following runs reuse the existing `.venv`.
 
-### 2.1 Training
+> **Note:** the `.venv` is created for the container's Python. If you also create one outside the container, delete it (`rm -rf .venv`) before launching the container so it can be rebuilt.
+
+### 2.2 Local installation (without Docker)
+
+Requirements: [uv](https://docs.astral.sh/uv/getting-started/installation/), an NVIDIA driver compatible with CUDA 12.9 and the CUDA 12.9 toolkit (`nvcc`) to compile the deformable attention op.
+
+```bash
+uv sync
+```
+
+If you modify the CUDA sources of the deformable attention op, `uv sync` will not rebuild it. Force the rebuild with:
+
+```bash
+uv sync --reinstall-package multiscaledeformableattention
+```
+
+### 2.3 Training
 
 To train any version of BEVPredFormer, you can use the following command inside the Docker container:
 
 ```bash
-python bevpredformer/train.py
+uv run python bevpredformer/train.py
 ```
+
+### 2.4 Validation
+
+To evaluate a checkpoint (path configured in `configs/val.yaml`):
+
+```bash
+uv run python bevpredformer/val.py
+```
+
+Validation runs in full precision (`32`) by default. Use `trainer.precision=bf16-mixed` for a faster run, which scores about 0.004 VPQ lower.
 
 The different configuration parameters can be tuned in the different yaml files located in the *configs* directory.
 
@@ -97,19 +129,20 @@ It is recommended to use some of the pretrained models available:
 
 We provide several checkpoints for BEV semantic segmentation. The model uses three frame as input and predicts the semantic segmentation map for the current frame. These checkpoints are used later to train the prediction models.
 
-| Checkpoint Name | Description | IoU | Download Link |
-|-----------------|-------------|-----|--------------|
-| BEVPredformer_Backbone_effvitL2_03.ckpt  | Long range with img resolution of 224x480 | 41.90 | [Download](https://github.com/miguelag99/BEVPredFormer/releases/download/v1.0.0/BEVPredformer_Backbone_effvitL2_03.ckpt) |
-| BEVPredformer_Backbone_effvitL2_05.ckpt | Long range with img resolution of 448x800  | 44.11 | [Download](https://github.com/miguelag99/BEVPredFormer/releases/download/v1.0.0/BEVPredformer_Backbone_effvitL2_05.ckpt) |
-| BEVPredformer_Backbone_effvitL2_1.ckpt  | Long range with img resolution of 640x1600 | 44.17 | [Download](https://github.com/miguelag99/BEVPredFormer/releases/download/v1.0.0/BEVPredformer_Backbone_effvitL2_1.ckpt)  |
-| BEVPredformer_Backbone_effvitL2_05_short_range.ckpt  | Short range with img resolution of 448x800 | 70.25 | [Download](https://github.com/miguelag99/BEVPredFormer/releases/download/v1.0.0/BEVPredformer_Backbone_effvitL2_05_short_range.ckpt) |
+| Checkpoint Name | Description | Download Link |
+|-----------------|-------------|--------------|
+| BEVPredformer_Backbone_effvitL2_03.ckpt  | Long range with img resolution of 224x480 | [Download](https://github.com/miguelag99/BEVPredFormer/releases/download/v2.0.0/BEVPredformer_Backbone_effvitL2_03.ckpt) |
+| BEVPredformer_Backbone_effvitL2_05.ckpt | Long range with img resolution of 448x800  | [Download](https://github.com/miguelag99/BEVPredFormer/releases/download/v2.0.0/BEVPredformer_Backbone_effvitL2_05.ckpt) |
+| BEVPredformer_Backbone_effvitL2_1.ckpt  | Long range with img resolution of 640x1600 | [Download](https://github.com/miguelag99/BEVPredFormer/releases/download/v2.0.0/BEVPredformer_Backbone_effvitL2_1.ckpt)  |
+| BEVPredformer_Backbone_effvitL2_05_short_range.ckpt  | Short range with img resolution of 448x800 | [Download](https://github.com/miguelag99/BEVPredFormer/releases/download/v2.0.0/BEVPredformer_Backbone_effvitL2_05_short_range.ckpt) |
 
 ### 3.2 Prediction Checkpoints
 
-| Checkpoint Name | Description | IoU | VPQ | Download Link |
-|-----------------|-------------|-----|-----|---------------|
-| effvit_SpUnet_2TripletTST_256_ps4_scale05.ckpt | | 40.9 | 33.2 | [Download](https://github.com/miguelag99/BEVPredFormer/releases/download/v1.1.0/effvit_SpUnet_2TripletTST_256_ps4_scale05.ckpt) |
-| effvit_SpUnet_2TripletTST_256_ps4_scale03.ckpt | | 38.8 | 31.0 | [Download](https://github.com/miguelag99/BEVPredFormer/releases/download/v1.1.0/effvit_SpUnet_2TripletTST_256_ps4_scale03.ckpt) |
+| Checkpoint Name | Download Link |
+|-----------------|---------------|
+| effvit_SpUnet_2TripletTST_256_ps4_scale05.ckpt | [Download](https://github.com/miguelag99/BEVPredFormer/releases/download/v2.0.0/effvit_SpUnet_2TripletTST_256_ps4_scale05.ckpt) |
+| effvit_SpUnet_2TripletTST_256_ps4_scale03.ckpt | [Download](https://github.com/miguelag99/BEVPredFormer/releases/download/v2.0.0/effvit_SpUnet_2TripletTST_256_ps4_scale03.ckpt) |
+| effvit_SpUnet_2TripletTST_256_ps4_scale05_short_range.ckpt | [Download](https://github.com/miguelag99/BEVPredFormer/releases/download/v2.0.0/effvit_SpUnet_2TripletTST_256_ps4_scale05_short_range.ckpt) |
 
 ## Citation
 Please, consider citing thiw work with:

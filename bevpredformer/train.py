@@ -1,20 +1,24 @@
+import os
 import sys
 from pathlib import Path
 from typing import List, Optional, Tuple
 
 import hydra
 import pyrootutils
-import pytorch_lightning as L
+import lightning as L
 import torch
 from omegaconf import DictConfig
-from pytorch_lightning import Callback, LightningDataModule, LightningModule, Trainer
-from pytorch_lightning.loggers import Logger
-from pytorch_lightning.profiler import PyTorchProfiler
+from lightning.pytorch import Callback, LightningDataModule, LightningModule, Trainer
+from lightning.pytorch.loggers import Logger
+from lightning.pytorch.profilers import PyTorchProfiler
 from torch.profiler import ProfilerActivity
 
 pyrootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
 
 from bevpredformer import utils
+
+# Workaround for loading models with weights only for torch > 2.6
+os.environ["TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD"] = "1"
 
 
 log = utils.get_pylogger(__name__)
@@ -90,9 +94,6 @@ def train(cfg: DictConfig) -> Tuple[dict, dict]:
         "logger": logger,
         "trainer": trainer,
     }
-    if logger:
-        sys.stderr = open(Path(logger[0].save_dir) / "stdd.err", "a")
-
     if logger:
         log.info("Logging hyperparameters!")
         utils.log_hyperparameters(object_dict)

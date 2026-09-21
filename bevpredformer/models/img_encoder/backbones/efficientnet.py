@@ -2,7 +2,7 @@ from collections import OrderedDict
 from pathlib import Path
 
 from efficientnet_pytorch import EfficientNet as EfficientNet_extractor
-from pytorch_lightning.utilities import rank_zero_only
+from lightning.pytorch.utilities.rank_zero import rank_zero_only
 from torch import nn
 
 from bevpredformer.models.img_encoder.backbones.common import Backbone

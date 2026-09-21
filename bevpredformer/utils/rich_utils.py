@@ -7,7 +7,7 @@ import rich.tree
 from hydra.core.hydra_config import HydraConfig
 from omegaconf import DictConfig, OmegaConf, open_dict
 from bevpredformer.utils import pylogger
-from pytorch_lightning.utilities import rank_zero_only
+from lightning.pytorch.utilities.rank_zero import rank_zero_only
 from rich.prompt import Prompt
 
 log = pylogger.get_pylogger(__name__)

@@ -16,6 +16,8 @@ from torch.autograd.function import once_differentiable
 
 
 class MSDeformAttnFunction(Function):
+    # This block requires float32 input tensors
+    # @torch.amp.custom_fwd(device_type='cuda' if torch.cuda.is_available() else 'cpu', cast_inputs=torch.float32)
     @staticmethod
     def forward(
         ctx,
@@ -26,6 +28,11 @@ class MSDeformAttnFunction(Function):
         attention_weights,
         im2col_step,
     ):
+        # Cast all inputs to match value's dtype
+        target_dtype = value.dtype
+        sampling_locations = sampling_locations.to(target_dtype)
+        attention_weights = attention_weights.to(target_dtype)
+        
         ctx.im2col_step = im2col_step
         output = MSDA.ms_deform_attn_forward(
             value,

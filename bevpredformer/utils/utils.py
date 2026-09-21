@@ -124,5 +124,5 @@ def get_ckpt_from_path(ckpt_path: Optional[str]):
         ckpt_path = os.path.join(get_original_cwd(), ckpt_path)
 
     # State Dict.
-    ckpt = torch.load(ckpt_path)
+    ckpt = torch.load(ckpt_path, weights_only=False)
     return ckpt

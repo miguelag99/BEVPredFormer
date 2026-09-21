@@ -4,3 +4,6 @@ in_c: ${model.net.out_c.vt}
 with_tail_conv: False
 with_large_kernels: False
 with_decoder_bias: False
+# Restores the residual connection on the channel-changing blocks (layer_2, layer_3).
+# False reproduces the released checkpoints; True changes the numerics and needs a finetune.
+with_proj_residual: False

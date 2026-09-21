@@ -1,5 +1,5 @@
 # Stage 1: Base image with system dependencies
-FROM nvidia/cuda:12.4.1-devel-ubuntu22.04 AS base
+FROM nvidia/cuda:12.9.1-devel-ubuntu24.04 AS base
 # FROM nvcr.io/nvidia/pytorch:24.10-py3 AS base
 
 # Set environment variables
@@ -9,13 +9,13 @@ ENV TZ=Europe/Madrid
 # Set timezone
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-# Stage 2: System dependencies and user setup
-FROM base AS system-deps
-
 # Obtain the UID and GID of the current user
 ARG USER
 ARG USER_ID
 ARG USER_GID
+
+# Remove default user present in ubuntu 24
+RUN userdel -r ubuntu
 
 RUN groupadd -g $USER_GID $USER \
     && useradd --uid $USER_ID --gid $USER_GID -m $USER \
@@ -26,7 +26,6 @@ RUN groupadd -g $USER_GID $USER \
 
 # Install system packages
 RUN apt-get update && apt-get install -y \
-    libgl1-mesa-glx \
     mesa-utils \
     libglapi-mesa \
     libqt5gui5 \
@@ -45,31 +44,14 @@ RUN apt-get update && apt-get install -y \
     tmux \
     && rm -rf /var/lib/apt/lists/*
 
-# Stage 3: Python dependencies
-FROM system-deps AS python-builds
+# Install UV
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+ENV UV_LINK_MODE=copy
+
 
 # Set the user
 ARG USER
 USER $USER
-
-# Upgrade pip
-RUN python -m pip install --upgrade pip
-ENV PATH="${PATH}:/home/$USER/.local/bin"
-
-# Install MMCV from source
-WORKDIR /home/$USER
-RUN git clone -b v2.2.0 https://github.com/open-mmlab/mmcv.git
-WORKDIR /home/$USER/mmcv
-RUN pip install -e . -v
-
-# Stage 4: Project-specific dependencies
-FROM python-builds AS project-build
-ARG USER
-
-# Install requirements
-RUN mkdir -p /home/$USER/.cache
-COPY requirements.txt /home/$USER/.cache
-RUN pip install -r /home/$USER/.cache/requirements.txt
 
 # Disable Jupyter authentication
 # RUN jupyter notebook --generate-config
@@ -82,7 +64,8 @@ WORKDIR /home/$USER/workspace
 
 # Set custom commands, aliases, and environment variables
 ENV USER=$USER
-RUN echo "alias PRUEBAS=\"cd /home/$USER/workspace && python bevpredformer/pruebas.py\"" >> /home/$USER/.bashrc
+RUN echo "export HF_HOME="/home/$USER/workspace/checkpoints/.hf"" >> /home/$USER/.bashrc
+RUN echo "alias PRUEBAS=\"cd /home/$USER/workspace && uv run python bevpredformer/pruebas.py\"" >> /home/$USER/.bashrc
 
 # Change terminal color
 ENV TERM=xterm-256color

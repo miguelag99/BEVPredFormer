@@ -1,5 +1,7 @@
 logs/
+plots/
 checkpoints/
+*.safetensors
 *.ckpt
 *.pth
 

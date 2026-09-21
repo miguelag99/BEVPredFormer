@@ -246,14 +246,23 @@ def make_instance_id_temporally_consecutive(pred_inst, preds, backward_flow, ign
     return consistent_instance_seg
 
 
-def predict_instance_segmentation(output, compute_matched_centers=False,  vehicles_id=1, spatial_extent=[50, 50]):
+def predict_instance_segmentation(
+    output,
+    compute_matched_centers=False,
+    vehicles_id=1,
+    spatial_extent=[50, 50],
+    nms_kernel_size=None,
+    conf_threshold=0.1,
+):
     """_summary_
 
     Args:
-        output (dict): output dictionary from the model containing at least 'segmentation' [t,n_class,200,200] and 'instance_flow' [t,2,200,200] keys.
+        output (dict): output dictionary from the model containing at least 'segmentation' [t,n_class,200,200] and 'instance_flow' [t,2,200,200] keys. If 'centerness' is given, it is added to the center scores.
         compute_matched_centers (bool, optional): _description_. Defaults to False.
         vehicles_id (int, optional): number of the index that corresponds to vehicle class . Defaults to 1.
         spatial_extent (list, optional): bev range in each axis in meters. Defaults to [50, 50].
+        nms_kernel_size (float, optional): kernel size to extract the instance centers. Defaults to None, which uses round(350 / spatial_extent[0]).
+        conf_threshold (float, optional): confidence threshold to keep an instance center. Defaults to 0.1.
 
     Returns:
         _type_: _description_
@@ -262,14 +271,22 @@ def predict_instance_segmentation(output, compute_matched_centers=False,  vehicl
     preds = torch.argmax(preds, dim=2, keepdims=True)
     foreground_masks = preds.squeeze(2) == vehicles_id
 
+    if nms_kernel_size is None:
+        nms_kernel_size = round(350 / spatial_extent[0])
+    centerness = output.get('centerness', None)
+
     batch_size, seq_len = preds.shape[:2]
     pred_inst = []
     for b in range(batch_size):
+        center_scores = torch.softmax(output['segmentation'], dim=2)[b, 0:1, vehicles_id].detach()
+        if centerness is not None:
+            center_scores = center_scores + centerness.float()[b, 0:1, 0].detach()
         pred_inst_batch = get_instance_segmentation_and_centers(
-            torch.softmax(output['segmentation'], dim=2)[b, 0:1, vehicles_id].detach(),
+            center_scores,
             output['instance_flow'][b, 1:2].detach(),
             foreground_masks[b, 1:2].detach(),
-            nms_kernel_size=round(350/spatial_extent[0]),
+            nms_kernel_size=nms_kernel_size,
+            conf_threshold=conf_threshold,
         )
         pred_inst.append(pred_inst_batch)
     pred_inst = torch.stack(pred_inst).squeeze(2)
@@ -315,10 +332,19 @@ def predict_instance_segmentation(output, compute_matched_centers=False,  vehicl
     return consistent_instance_seg.long()
 
 
-def generate_gt_instance_segmentation(output, compute_matched_centers=False,  vehicles_id=1, spatial_extent=[50, 50]):
+def generate_gt_instance_segmentation(
+    output,
+    compute_matched_centers=False,
+    vehicles_id=1,
+    spatial_extent=[50, 50],
+    nms_kernel_size=None,
+):
     preds = output['segmentation']
     foreground_masks = preds.squeeze(2) == vehicles_id
     output['segmentation'] = output['segmentation'].float() + output['centerness'].float()
+
+    if nms_kernel_size is None:
+        nms_kernel_size = round(350 / spatial_extent[0])
 
     batch_size, seq_len = preds.shape[:2]
     pred_inst = []
@@ -327,7 +353,7 @@ def generate_gt_instance_segmentation(output, compute_matched_centers=False,  ve
             output['segmentation'][b, 0:1, 0].detach(),
             output['instance_flow'][b, 1:2].detach(),
             foreground_masks[b, 1:2].detach(),
-            nms_kernel_size=round(350/spatial_extent[0]),
+            nms_kernel_size=nms_kernel_size,
         )
         pred_inst.append(pred_inst_batch)
     pred_inst = torch.stack(pred_inst).squeeze(2)
