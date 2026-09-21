@@ -28,7 +28,7 @@ scene_ids: [3, 1137, 2345, 3876, 4, 220, 3066, 4030]
 # simply provide checkpoint path to resume training
 ckpt:
   resume: True
-  path: /home/perception/workspace/checkpoints/effvit_SpUnet_2QuadTSST_256_ps4_scale05_shortrange.ckpt
+  path: /home/perception/workspace/checkpoints/effvit_SpUnet_2TripletTST_256_ps4_scale05.ckpt
   model:
     freeze: null
     load: 'all'

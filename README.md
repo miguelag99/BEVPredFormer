@@ -99,16 +99,6 @@ If you modify the CUDA sources of the deformable attention op, `uv sync` will no
 uv sync --reinstall-package multiscaledeformableattention
 ```
 
-### 2.2.1 Checkpoint migration
-
-Checkpoints released before v1.2.0 store six view transform layers, of which only the last one ever affected the output (the view transform did not feed each layer's output into the next). The current model builds a single layer, so those checkpoints need a one-off conversion:
-
-```bash
-uv run scripts/migrate_checkpoint.py checkpoints/<name>.ckpt
-```
-
-This writes `<name>_1layer.ckpt` next to the original and never modifies the input. The BEV outputs are unchanged.
-
 ### 2.3 Training
 
 To train any version of BEVPredFormer, you can use the following command inside the Docker container:
@@ -139,19 +129,20 @@ It is recommended to use some of the pretrained models available:
 
 We provide several checkpoints for BEV semantic segmentation. The model uses three frame as input and predicts the semantic segmentation map for the current frame. These checkpoints are used later to train the prediction models.
 
-| Checkpoint Name | Description | IoU | Download Link |
-|-----------------|-------------|-----|--------------|
-| BEVPredformer_Backbone_effvitL2_03.ckpt  | Long range with img resolution of 224x480 | 41.90 | [Download](https://github.com/miguelag99/BEVPredFormer/releases/download/v1.0.0/BEVPredformer_Backbone_effvitL2_03.ckpt) |
-| BEVPredformer_Backbone_effvitL2_05.ckpt | Long range with img resolution of 448x800  | 44.11 | [Download](https://github.com/miguelag99/BEVPredFormer/releases/download/v1.0.0/BEVPredformer_Backbone_effvitL2_05.ckpt) |
-| BEVPredformer_Backbone_effvitL2_1.ckpt  | Long range with img resolution of 640x1600 | 44.17 | [Download](https://github.com/miguelag99/BEVPredFormer/releases/download/v1.0.0/BEVPredformer_Backbone_effvitL2_1.ckpt)  |
-| BEVPredformer_Backbone_effvitL2_05_short_range.ckpt  | Short range with img resolution of 448x800 | 70.25 | [Download](https://github.com/miguelag99/BEVPredFormer/releases/download/v1.0.0/BEVPredformer_Backbone_effvitL2_05_short_range.ckpt) |
+| Checkpoint Name | Description | Download Link |
+|-----------------|-------------|--------------|
+| BEVPredformer_Backbone_effvitL2_03.ckpt  | Long range with img resolution of 224x480 | [Download](https://github.com/miguelag99/BEVPredFormer/releases/download/v2.0.0/BEVPredformer_Backbone_effvitL2_03.ckpt) |
+| BEVPredformer_Backbone_effvitL2_05.ckpt | Long range with img resolution of 448x800  | [Download](https://github.com/miguelag99/BEVPredFormer/releases/download/v2.0.0/BEVPredformer_Backbone_effvitL2_05.ckpt) |
+| BEVPredformer_Backbone_effvitL2_1.ckpt  | Long range with img resolution of 640x1600 | [Download](https://github.com/miguelag99/BEVPredFormer/releases/download/v2.0.0/BEVPredformer_Backbone_effvitL2_1.ckpt)  |
+| BEVPredformer_Backbone_effvitL2_05_short_range.ckpt  | Short range with img resolution of 448x800 | [Download](https://github.com/miguelag99/BEVPredFormer/releases/download/v2.0.0/BEVPredformer_Backbone_effvitL2_05_short_range.ckpt) |
 
 ### 3.2 Prediction Checkpoints
 
-| Checkpoint Name | Description | IoU | VPQ | Download Link |
-|-----------------|-------------|-----|-----|---------------|
-| effvit_SpUnet_2TripletTST_256_ps4_scale05.ckpt | | 40.9 | 33.2 | [Download](https://github.com/miguelag99/BEVPredFormer/releases/download/v1.1.0/effvit_SpUnet_2TripletTST_256_ps4_scale05.ckpt) |
-| effvit_SpUnet_2TripletTST_256_ps4_scale03.ckpt | | 38.8 | 31.0 | [Download](https://github.com/miguelag99/BEVPredFormer/releases/download/v1.1.0/effvit_SpUnet_2TripletTST_256_ps4_scale03.ckpt) |
+| Checkpoint Name | Download Link |
+|-----------------|---------------|
+| effvit_SpUnet_2TripletTST_256_ps4_scale05.ckpt | [Download](https://github.com/miguelag99/BEVPredFormer/releases/download/v2.0.0/effvit_SpUnet_2TripletTST_256_ps4_scale05.ckpt) |
+| effvit_SpUnet_2TripletTST_256_ps4_scale03.ckpt | [Download](https://github.com/miguelag99/BEVPredFormer/releases/download/v2.0.0/effvit_SpUnet_2TripletTST_256_ps4_scale03.ckpt) |
+| effvit_SpUnet_2TripletTST_256_ps4_scale05_short_range.ckpt | [Download](https://github.com/miguelag99/BEVPredFormer/releases/download/v2.0.0/effvit_SpUnet_2TripletTST_256_ps4_scale05_short_range.ckpt) |
 
 ## Citation
 Please, consider citing thiw work with:
