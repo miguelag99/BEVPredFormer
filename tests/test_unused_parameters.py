@@ -85,6 +85,7 @@ def _compose(overrides):
             ["model.net.view_transform.n_layers=6"],
             id="multi_layer_view_transform",
         ),
+        pytest.param(["model=BEVPredFormerPredictorLSS"], id="lss"),
     ],
 )
 def test_every_trainable_parameter_gets_a_gradient(overrides):
