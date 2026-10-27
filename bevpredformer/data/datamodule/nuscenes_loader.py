@@ -75,6 +75,7 @@ class NuScenesDatamodule(pl.LightningDataModule):
         # Filters
         only_object_center_in: bool = False,
         filters_cat: List[str] = [],
+        scene_conditions: List[str] = [],
         plot_ego: bool = False,
         # Cameras
         to_cam_ref: bool = False,
@@ -132,6 +133,7 @@ class NuScenesDatamodule(pl.LightningDataModule):
         # Filters
         self.only_object_center_in = only_object_center_in
         self.filters_cat = filters_cat
+        self.scene_conditions = scene_conditions
         self.plot_ego = plot_ego
         # Cameras
         self.to_cam_ref = to_cam_ref
@@ -178,6 +180,7 @@ class NuScenesDatamodule(pl.LightningDataModule):
             # Filters
             only_object_center_in=self.only_object_center_in,
             filters_cat=self.filters_cat,
+            scene_conditions=self.scene_conditions,
             plot_ego=self.plot_ego,
             # Temporal
             cam_T_P=self.cam_T_P,

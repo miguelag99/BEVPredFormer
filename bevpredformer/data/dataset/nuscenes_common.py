@@ -9,6 +9,7 @@ Authors: Jonah Philion and Sanja Fidler
 
 import json
 import os
+import warnings
 from copy import deepcopy
 from math import prod
 from typing import Dict, List, Optional
@@ -82,6 +83,34 @@ DETECTION_CLS = {
     "vehicle.trailer",
     "vehicle.truck",
 }
+SCENE_CONDITION_KEYWORDS = {
+    "night": ["night", "dark"],
+    "rain": ["rain", "rainy", "wet"],
+    "day": ["day", "sunny", "clear"],
+}
+
+
+def _match_scene_condition(description: str, condition: str) -> bool:
+    """Check if a nuScenes scene description matches a day/night/rain condition.
+
+    "day" also matches scenes untagged for night/rain, since most daytime
+    scenes carry no explicit weather/lighting tag at all.
+    """
+    desc = description.lower()
+    cond = condition.lower()
+    if cond not in SCENE_CONDITION_KEYWORDS:
+        raise ValueError(
+            f"Unknown scene_conditions value {condition!r}; "
+            f"expected one of {list(SCENE_CONDITION_KEYWORDS)}."
+        )
+    matched = any(kw in desc for kw in SCENE_CONDITION_KEYWORDS[cond])
+    if cond == "day" and not matched:
+        matched = not any(
+            kw in desc
+            for c in ("night", "rain")
+            for kw in SCENE_CONDITION_KEYWORDS[c]
+        )
+    return matched
 
 
 class NuScenesDataset(torch.utils.data.Dataset):
@@ -109,6 +138,7 @@ class NuScenesDataset(torch.utils.data.Dataset):
         # Filters
         only_object_center_in: bool = False,
         filters_cat: List[str] = [],
+        scene_conditions: List[str] = [],
         plot_ego: bool = False,
         # Outputs
         hdmap_names: List[str] = [],
@@ -127,6 +157,14 @@ class NuScenesDataset(torch.utils.data.Dataset):
             self.dataroot = self.nusc.data_path
         else:
             self.dataroot = self.nusc.dataroot
+
+        # Filters (scene-level, must be set before _get_scenes())
+        self.scene_conditions = scene_conditions
+        if self.is_lyft and self.scene_conditions:
+            warnings.warn(
+                "scene_conditions filtering is not supported for Lyft; ignoring."
+            )
+
         self.scenes = self._get_scenes()
         self.ixes = self._prepro()
 
@@ -211,6 +249,16 @@ class NuScenesDataset(torch.utils.data.Dataset):
             }[self.nusc.version][self.is_train]
             self.split = split
             scenes = create_splits_scenes()[split]
+            if self.scene_conditions:
+                desc_by_name = {s["name"]: s["description"] for s in self.nusc.scene}
+                scenes = [
+                    name
+                    for name in scenes
+                    if any(
+                        _match_scene_condition(desc_by_name[name], c)
+                        for c in self.scene_conditions
+                    )
+                ]
         else:
             scenes = [row["name"] for row in self.nusc.scene]
             indices = TRAIN_LYFT_INDICES if self.is_train else VAL_LYFT_INDICES
