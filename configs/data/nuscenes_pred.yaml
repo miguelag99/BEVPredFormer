@@ -15,8 +15,7 @@ grid:
   xbound: [-50.0, 50.0, 0.5]
   ybound: [-50.0, 50.0, 0.5]
 
-  # xbound: [-15.0, 15.0, 0.15]
-  # ybound: [-15.0, 15.0, 0.15]
+  # Short range: use experiment=short_range (configs/experiment/short_range.yaml)
 
   zbound: [-10.0, 10.0, 20.0]
   dbound: [4.0, 45.0, 1.0]

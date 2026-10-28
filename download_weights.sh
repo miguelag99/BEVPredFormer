@@ -2,13 +2,50 @@
 # Create checkpoints directory if it doesn't exist
 mkdir -p ./checkpoints
 
+RELEASE_URL="https://github.com/miguelag99/BEVPredFormer/releases/download/v2.0.0"
+
+# Stage-2 prediction models (release v2.0.0)
+PREDICTION_CKPTS=(
+    "effvit_SpUnet_2TripletTST_256_ps4_scale05.ckpt"
+    "effvit_SpUnet_2TripletTST_256_ps4_scale03.ckpt"
+    "effvit_SpUnet_2TripletTST_256_ps4_scale05_short_range.ckpt"
+)
+
+# Stage-1 segmentation backbones (release v2.0.0)
+BACKBONE_CKPTS=(
+    "BEVPredformer_Backbone_effvitL2_03.ckpt"
+    "BEVPredformer_Backbone_effvitL2_05.ckpt"
+    "BEVPredformer_Backbone_effvitL2_1.ckpt"
+    "BEVPredformer_Backbone_effvitL2_05_short_range.ckpt"
+)
+
+download_release() {
+    for name in "$@"; do
+        if [ -f "checkpoints/$name" ]; then
+            echo "$name already exists, skipping download."
+        else
+            echo "Downloading $name..."
+            wget "$RELEASE_URL/$name" -P checkpoints || exit 1
+        fi
+    done
+}
+
 # Check user argument
 if [ "$#" -eq 0 ]; then
-    echo "Usage: ./download_weights.sh [resnet50|resnet101|efficientnet]"
+    echo "Usage: ./download_weights.sh [prediction|backbone|all|resnet50|resnet101|efficientnet]"
     exit 1
 fi
 
 case "$1" in
+    "prediction")
+        download_release "${PREDICTION_CKPTS[@]}"
+        ;;
+    "backbone")
+        download_release "${BACKBONE_CKPTS[@]}"
+        ;;
+    "all")
+        download_release "${PREDICTION_CKPTS[@]}" "${BACKBONE_CKPTS[@]}"
+        ;;
     "resnet50")
         echo "Checking ResNet50 weights..."
         if [ -f "checkpoints/resnet50-0676ba61.pth" ]; then
@@ -38,10 +75,10 @@ case "$1" in
         ;;
     *)
         echo "Invalid argument: $1"
-        echo "Valid options are: resnet50, resnet101, efficientnet"
+        echo "Valid options are: prediction, backbone, all, resnet50, resnet101, efficientnet"
         exit 1
         ;;
-        
+
 esac
 
 echo "Weights downloaded successfully to ./checkpoints"
