@@ -14,6 +14,7 @@ defaults:
   - losses@model.loss_kwargs.segm_type: cewithlogit.yaml
   - optional local: default.yaml
   - debug: null
+  - experiment: null
 
 # task name, determines output directory path
 task_name: "train"

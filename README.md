@@ -109,11 +109,27 @@ uv run python bevpredformer/train.py
 
 ### 2.4 Validation
 
-To evaluate a checkpoint (path configured in `configs/val.yaml`):
+Download the released checkpoints into `./checkpoints` (see [Checkpoints](#3-checkpoints)):
+
+```bash
+./download_weights.sh prediction   # stage-2 prediction models
+./download_weights.sh backbone     # stage-1 segmentation backbones
+```
+
+To evaluate a checkpoint (path configured in `configs/val.yaml`), long range (100x100 m at 0.5 m):
 
 ```bash
 uv run python bevpredformer/val.py
 ```
+
+Short range (30x30 m at 0.15 m). The `short_range` experiment config sets the BEV grid, the projector bounds and the post-processing (`nms_kernel_size: 13`):
+
+```bash
+uv run python bevpredformer/val.py experiment=short_range \
+    ckpt.path=checkpoints/effvit_SpUnet_2TripletTST_256_ps4_scale05_short_range.ckpt
+```
+
+The same `experiment=short_range` override applies to `bevpredformer/train.py`.
 
 Validation runs in full precision (`32`) by default. Use `trainer.precision=bf16-mixed` for a faster run, which scores about 0.004 VPQ lower.
 
@@ -121,7 +137,7 @@ The different configuration parameters can be tuned in the different yaml files 
 
 It is recommended to use some of the pretrained models available:
 
-- BEVPredformer_Backbone_05.ckpt: Pretrained model with EfficientViT backbone for semantic segmentation (no prediction head). Recommended to use as a freezed backbone to train prediction models. Keys to load and freeze in train.yaml: `'net.backbone', 'net.neck', 'net.view_transform', 'net.decoder', 'net.coord_selector' and 'net.query_gen'`.
+- BEVPredformer_Backbone_effvitL2_05.ckpt (long range) / BEVPredformer_Backbone_effvitL2_05_short_range.ckpt (short range): Pretrained model with EfficientViT backbone for semantic segmentation (no prediction head). Recommended to use as a freezed backbone to train prediction models. Keys to load and freeze in train.yaml: `'net.backbone', 'net.neck', 'net.view_transform', 'net.decoder', 'net.coord_selector' and 'net.query_gen'`.
 
 ## 3. Checkpoints
 
