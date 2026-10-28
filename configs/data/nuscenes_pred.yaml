@@ -84,3 +84,5 @@ mode_ref_cam_T: 'present'
 # Filters
 only_object_center_in: false
 filters_cat: ['vehicle']
+# Scene-level filter: any of ['day','night','rain']; [] = all scenes
+scene_conditions: []

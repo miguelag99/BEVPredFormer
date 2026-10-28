@@ -1,0 +1,55 @@
+# BEVPredFormerPredictor with a Lift-Splat-Shoot view transform instead of deformable attention.
+# The depth head sits on the neck output, so any backbone works: model/net/backbone=resnet50
+defaults:
+  - _self_
+  - net/backbone: efficientvit.yaml
+  - net/neck: agp.yaml
+  - optimizer: adamW.yaml
+  - scheduler: onecycle.yaml
+  - net/autoencoder: sparse_unet.yaml
+  - net/temporal: diff_guided_predformer.yaml
+  - net/heads: pyramid_stconv.yaml
+
+name: BEVPredFormerPredictorLSS
+
+_target_: bevpredformer.models.PredictionTrainer
+
+net:
+  _target_: bevpredformer.models.predictor.BEVPredFormerPredictor
+
+  in_shape:
+    query_gen: [200,200] # bev size, read by the temporal block
+    projector: [200,200,8]
+    spatial_bounds: ${model.net.projector.spatial_bounds}
+
+  # If true, the temporal block will need 6 extra channels to concatenate the temporal
+  # ego transform of the past bev features
+  use_future_ego: true
+
+  out_seq_len: 6
+  in_seq_len: 3
+
+  in_c:
+    neck: ${get_in_c_neck:${model.net.backbone._target_}}
+
+  out_c:
+    base_neck: 128
+    neck : ${model.net.out_c.base_neck}
+    vt: ${model.net.out_c.base_neck}
+    autoencoder: ${model.net.out_c.vt}
+
+  # LSS has no BEV queries.
+  query_gen: null
+
+  projector:
+    _target_: bevpredformer.models.projector.LSSProjector
+    spatial_bounds:  [-49.75, 49.75, -49.75, 49.75, -3.375, 5.375]
+    bev_shape: ${model.net.in_shape.projector}
+    dbound: [2.0, 50.0, 1.0] # [min, max, step] depth bins in meters
+
+  view_transform:
+    _target_: bevpredformer.models.view_transform.LiftSplatVT
+    in_c: ${model.net.out_c.neck}
+    out_c: ${model.net.out_c.vt}
+    bev_shape: ${model.net.in_shape.query_gen}
+    dbound: ${model.net.projector.dbound}

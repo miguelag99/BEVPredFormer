@@ -103,8 +103,12 @@ class BEVPredFormerPredictor(Network):
         dict_vox.update(self.projector(dict_mat, dict_shape, dict_vox))
         # VT
         b_t = (dict_shape["b"], dict_shape["t"])
-        query, hq_wq = self.query_gen(b_t)
-        query_pos, hq_wq = self.query_gen(b_t)
+        if self.query_gen is not None:
+            query, hq_wq = self.query_gen(b_t)
+            query_pos, hq_wq = self.query_gen(b_t)
+        else:
+            # Query-free view transforms (LSS) define the BEV shape themselves.
+            query, query_pos, hq_wq = None, None, self.view_transform.bev_shape
         bev_query, *_ = self.view_transform(
             query, query_pos, dict_img["img_feats"], dict_vox
         )
