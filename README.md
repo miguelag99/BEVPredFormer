@@ -14,6 +14,12 @@
   <sup>1</sup> Universidad de Alcalá
 </p>
 
+<p align="center">
+    📝 <a href="https://www.mdpi.com/1424-8220/26/22/7206">Sensors Journal</a> ·
+    📔 <a href="https://arxiv.org/abs/2604.02930">arXiv</a> ·
+    🏋️‍♂️ <a href="https://github.com/miguelag99/BEVPredFormer/releases/tag/v2.0.0">Weights</a> 
+</p>
+
 <div align=center>
     <img src="https://img.shields.io/badge/Changelog-v2.0.0-2ea44f?style=for-the-badge" alt="CHANGELOG">
     <img src="https://img.shields.io/badge/PyTorch-2.8.0-EE4C2C.svg?style=for-the-badge&logo=pytorch" alt="pytorch">
@@ -24,9 +30,9 @@
     <img src="https://img.shields.io/badge/CUDA-12.9-76B900?style=for-the-badge&logo=nvidia" alt="CUDA">
     <img src="https://img.shields.io/badge/uv-gray?style=for-the-badge&logo=uv" alt="uv">
     <img src="https://img.shields.io/badge/Docker-gray?style=for-the-badge&logo=docker&logoColor=white&labelColor=%23007FFF" alt="Docker">
-    <a href="https://arxiv.org/abs/2604.02930">
+    <!-- <a href="https://arxiv.org/abs/2604.02930">
       <img src="https://img.shields.io/badge/arxiv-black?style=for-the-badge&logo=arxiv" alt="arxiv">
-    </a>
+    </a> -->
 </div>
 
 Implementation of BEVPredFormer, a transformer-based model for predicting future trajectories in bird's-eye view (BEV) space.
@@ -161,9 +167,22 @@ We provide several checkpoints for BEV semantic segmentation. The model uses thr
 | effvit_SpUnet_2TripletTST_256_ps4_scale05_short_range.ckpt | [Download](https://github.com/miguelag99/BEVPredFormer/releases/download/v2.0.0/effvit_SpUnet_2TripletTST_256_ps4_scale05_short_range.ckpt) |
 
 ## Citation
-Please, consider citing thiw work with:
+Please, consider citing this work with:
 
 ```bibtex
+@Article{bevpredformer2026,
+    AUTHOR = {Antunes-García, Miguel and Montiel-Marín, Santiago and Sánchez-García, Fabio and Gutiérrez-Moreno, Rodrigo and Barea, Rafael and Bergasa, Luis M.},
+    TITLE = {BEVPredFormer: Spatio-Temporal Attention for BEV Instance Prediction in Autonomous Driving},
+    JOURNAL = {Sensors},
+    VOLUME = {26},
+    YEAR = {2026},
+    NUMBER = {22},
+    ARTICLE-NUMBER = {7206},
+    URL = {https://www.mdpi.com/1424-8220/26/22/7206},
+    ISSN = {1424-8220},
+    DOI = {10.3390/s26227206}
+}
+
 @misc{antunesgarcía2026bevpredformerspatiotemporalattentionbev,
       title={BEVPredFormer: Spatio-temporal Attention for BEV Instance Prediction in Autonomous Driving}, 
       author={Miguel Antunes-García and Santiago Montiel-Marín and Fabio Sánchez-García and Rodrigo Gutiérrez-Moreno and Rafael Barea and Luis M. Bergasa},
